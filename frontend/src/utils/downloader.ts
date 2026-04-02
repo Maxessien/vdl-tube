@@ -48,13 +48,15 @@ export const timestampToSeconds = (timestamp: string): number => {
     }, 0);
 };
 
-export const secondsToTimestamp = (seconds: number): string => {
+export const secondsToTimestamp = (seconds: number, omitHours: boolean = false): string => {
   const safeSeconds = Math.max(0, Math.floor(seconds));
   const hours = Math.floor(safeSeconds / 3600);
   const minutes = Math.floor((safeSeconds % 3600) / 60);
   const remainingSeconds = safeSeconds % 60;
 
-  return [hours, minutes, remainingSeconds]
+  const timeArr = omitHours ? [minutes, remainingSeconds] : [hours, minutes, remainingSeconds]
+
+  return timeArr
     .map((part) => part.toString().padStart(2, "0"))
     .join(":");
 };

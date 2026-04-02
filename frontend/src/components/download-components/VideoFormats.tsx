@@ -2,11 +2,13 @@
 
 import { RootState } from "@/src/store";
 import type { VideoFormat } from "@/src/types/matesTypes";
+import { resolveDownloadUrl } from "@/src/utils/mate";
 import { motion } from "framer-motion";
 import { notFound } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaArrowRight } from "react-icons/fa";
 import { useSelector } from "react-redux";
+import VideoPlayer from "../video-player/VideoPlayer";
 import QualityInfo from "./QualityInfo";
 
 const FormatsListCard = ({
@@ -26,13 +28,16 @@ const FormatsListCard = ({
       <button
         onClick={openInfo}
         className="flex disabled:opacity-75 py-2 px-4 justify-center items-center text-base text-(--text-primary) not-visited:rounded-full bg-(--main-primary) font-semibold"
-      ><FaArrowRight /></button>
+      >
+        <FaArrowRight />
+      </button>
     </li>
   );
 };
 
 const VideoFormats = ({ id }: { id: string }) => {
   const infos = useSelector((state: RootState) => state.infoMappings);
+  const [vidUrl, setVidUrl] = useState("");
   const info = infos?.[id];
 
   if (!info) return notFound();
@@ -42,16 +47,33 @@ const VideoFormats = ({ id }: { id: string }) => {
     quality: number;
   }>({ isOpen: false, quality: info.video_formats?.[0].quality });
 
+  const getVidUrl = async (quality: string) => {
+    const { data } = await resolveDownloadUrl(
+      info.key,
+      quality,
+      "all",
+      info.url,
+      info.titleSlug,
+    );
+    return `/api/download?url=${data.downloadUrl}`;
+  };
 
+  useEffect(() => {
+    (async () => {
+      const url = await getVidUrl(info.video_formats[0].quality.toString());
+      setVidUrl(url);
+    })();
+  }, []);
 
   return (
     <section className="px-3 py-4 max-w-lg mx-auto">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      {/* <img
         className="w-full"
         src={info?.thumbnail ?? info?.thumbnail_formats?.[0].url}
         alt={`${info?.title} thumbnail`}
-      />
+      /> */}
+
+      <VideoPlayer posterUrl={info?.thumbnail ?? info?.thumbnail_formats?.[0].url} title={info.title} url={vidUrl} />
       <h1 className="text-2xl text-(--text-primary) my-3 w-full text-center font-semibold">
         {info?.title}
       </h1>
