@@ -1,6 +1,7 @@
 import { Innertube, UniversalCache, YTNodes } from "youtubei.js";
-const youtube = await Innertube.create({ cache: new UniversalCache(true) });
 
+
+const youtube = await Innertube.create({cache: new UniversalCache(true)});
 
 const searchVideo = async (query: string) => {
   try {
@@ -26,7 +27,7 @@ const searchVideo = async (query: string) => {
           ? [best_thumbnail.url, ...thumbnails.map(({url})=>url)]
           : thumbnails.map(({url})=>url),
         duration,
-        view_count,
+        view_count: view_count.toString(),
       }),
     );
   } catch (err) {
@@ -35,15 +36,16 @@ const searchVideo = async (query: string) => {
   }
 };
 
-const getVideoChapters = async(videoId: string)=>{
+const getVideoChapters = async(videoId: string) =>{
     try {
         const info = await youtube.getInfo(videoId)
-        return info.player_overlays.decorated_player_bar.player_bar.markers_map?.[0].value.chapters ?? null
+        const chapters = info.player_overlays.decorated_player_bar.player_bar.markers_map?.[0].value.chapters
+        return  chapters?.length > 0 ? chapters.map(({title, time_range_start_millis})=>({title: title.toString(), start: time_range_start_millis/1000})) : []
     } catch (err) {
-        console.log(err);
-        return null;
+        return [];
     }
 }
 
 
-export { searchVideo, youtube, getVideoChapters };
+export { getVideoChapters, searchVideo, youtube };
+

@@ -54,13 +54,13 @@ const Chapters = ({
                   </div>
                   <button
                     onClick={() => {
-                      console.log(start, title, chapters?.[index + 1]?.start);
+                      console.log(start, title, chapters?.data?.[index + 1]?.start);
                       return downloadFn(
                         `chapter-${index}`,
                         start,
                         title,
-                        chapters?.[index + 1]?.start
-                          ? chapters[index + 1].start
+                        chapters?.data?.[index + 1]?.start
+                          ? chapters?.data?.[index + 1].start
                           : undefined,
                       );
                     }}

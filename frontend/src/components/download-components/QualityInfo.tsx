@@ -61,8 +61,8 @@ const QualityInfo = ({ info, closeInfoFn, quality }: QualityInfo) => {
 
   const getChapters = async () => {
     const vidId = info?.id ?? getYouTubeID(url);
-    const chapters = await getVideoChapters(vidId);
-    return chapters;
+    const chapters = await axios.get<{title: string, start: number}[]>("/api/chapter", {params: {id: vidId}});
+    return chapters.data;
   };
 
   useEffect(() => {
@@ -73,9 +73,9 @@ const QualityInfo = ({ info, closeInfoFn, quality }: QualityInfo) => {
         if (!chapters) throw new Error("No chapters for this video")
         setChaps({
           isLoading: false,
-          data: chapters?.map(({ title, time_range_start_millis }) => ({
-            start: time_range_start_millis / 1000,
-            title: title.toString(),
+          data: chapters?.map(({ title, start }) => ({
+            start,
+            title,
           })),
         });
       } catch (err) {

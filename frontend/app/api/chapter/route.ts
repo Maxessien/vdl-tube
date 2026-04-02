@@ -1,12 +1,11 @@
-import {Innertube} from "youtubei.js"
-import YtChapters from "get-youtube-chapters"
+
+import { getVideoChapters } from "@/src/utils/youtubei"
 
 export async function GET(req: Request) {
     const {searchParams} = new URL(req.url)
     const vidId = searchParams.get("id")
-    const tube = await Innertube.create()
-    const info = await tube.getBasicInfo(vidId);
-    const chapters = YtChapters(info?.basic_info?.short_description)
+
+    const chapters = await getVideoChapters(vidId)
 
     return Response.json(chapters)
 }

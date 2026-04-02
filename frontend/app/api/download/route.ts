@@ -6,7 +6,6 @@ import ffmpeg from "fluent-ffmpeg";
 import { existsSync } from "fs";
 import path from "path";
 
-
 export const runtime = "nodejs";
 
 function resolveFfmpegBinaryPath(): string | null {
@@ -100,20 +99,22 @@ export async function GET(request: Request) {
     command.duration(endTime - startTime);
   }
 
- const cloudinaryRes: UploadApiResponse = await new Promise((resolve, reject) => {
-    const stream = uploader.upload_stream(
-      { folder: "/vdl-tube", resource_type: "video" },
-      (err, result) => {
-        if (err) {
-          logger.error("Cloudnary upload err", err)
-          return reject(err)
-        };
-        resolve(result);
-      }
-    );
+  const cloudinaryRes: UploadApiResponse = await new Promise(
+    (resolve, reject) => {
+      const stream = uploader.upload_stream(
+        { folder: "/vdl-tube", resource_type: "video" },
+        (err, result) => {
+          if (err) {
+            logger.error("Cloudnary upload err", err);
+            return reject(err);
+          }
+          resolve(result);
+        },
+      );
 
-    command.pipe(stream);
-  });
+      command.pipe(stream);
+    },
+  );
 
   const res = await fetch(cloudinaryRes.secure_url);
 

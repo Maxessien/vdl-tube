@@ -6,12 +6,14 @@ export const metadata: Metadata = {
 };
 
 interface DownloadPageProps {
-  params: Promise<{ id: string }> | { id: string };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{id: string}>
 }
 
-const DownloadPage = async ({ params }: DownloadPageProps) => {
+const DownloadPage = async ({ params, searchParams }: DownloadPageProps) => {
   const par = await params
-
+  const sPar = await searchParams
+  
   return <VideoFormats id={par.id} />
 };
 
