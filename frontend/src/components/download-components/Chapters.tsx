@@ -34,7 +34,7 @@ const Chapters = ({
       </header>
       {!chapters?.isLoading ? (
         chapters?.data?.length > 0 ? (
-          <ul>
+          <ul className="space-y-2">
             {chapters?.data?.map(({ title, start }, index) => {
               return (
                 <li
