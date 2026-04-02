@@ -24,7 +24,6 @@ const Chapters = ({
   isPending: boolean;
   isActive: (type: string) => boolean;
 }) => {
-  console.log(chapters);
 
   return (
     <section className="w-full">

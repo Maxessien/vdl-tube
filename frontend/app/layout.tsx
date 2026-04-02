@@ -9,7 +9,7 @@ import "../src/assets/css-reusable/variables.css";
 import AppProviders from "./providers";
 
 export const metadata: Metadata = {
-  title: "Tube VDL",
+  title: "VDL Tube",
   icons: {
     icon: "/vdl_tube_logo_transparent.png",
   },

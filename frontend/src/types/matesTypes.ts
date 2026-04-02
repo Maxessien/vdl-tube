@@ -43,3 +43,14 @@ export interface DownloadUrlResult {
   message: string;
   data: { downloadUrl: string } | null;
 }
+
+export interface SearchResult {
+  title: string;
+  video_id: string;
+  thumbnails: string[];
+  duration: {
+    text: string | undefined;
+    seconds: number;
+  };
+  view_count: string;
+}
