@@ -1,7 +1,7 @@
 import { Innertube, UniversalCache, YTNodes } from "youtubei.js";
 
 
-const youtube = await Innertube.create({cache: new UniversalCache(true)});
+const youtube = await Innertube.create({cache: new UniversalCache(true, '/tmp/ytjs-cache')});
 
 const searchVideo = async (query: string) => {
   try {
