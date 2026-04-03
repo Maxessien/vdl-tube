@@ -79,10 +79,10 @@ const VideoPlayer = ({
   
 
   return (
-    <div className="w-full relative">
+    <div className="h-full w-max max-w-full relative">
       <video
         ref={videoRef}
-        className="w-full z-5"
+        className="h-full z-5"
         preload="metadata"
         poster={posterUrl}
         onLoadedMetadata={(e) => {

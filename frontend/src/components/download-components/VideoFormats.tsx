@@ -55,58 +55,66 @@ const VideoFormats = ({ id }: { id: string }) => {
       null,
       info.titleSlug,
     );
-    return `/api/download?url=${data.downloadUrl}&stream=true`;
+    if (!data) return "/null";
+    return `/api/download?url=${data?.downloadUrl}&stream=true`;
   };
 
   useEffect(() => {
     (async () => {
-      const urls: string[] = []
-      for (const format of info.video_formats){
-        const url = await getVidUrl(format.quality.toString())
-        urls.push(url)
+      const urls: string[] = [];
+      for (const format of info.video_formats) {
+        const url = await getVidUrl(format.quality.toString());
+        urls.push(url);
       }
       setVidUrl(urls);
     })();
   }, []);
 
   return (
-    <section className="px-3 py-4 md:grid md:grid-cols-[70%_30%] mx-auto">
-
-      {vidUrl?.length > 0 && <VideoPlayer posterUrl={info?.thumbnail ?? info?.thumbnail_formats?.[0].url} title={info.title} urls={vidUrl} />}
-      <section className="w-full md:h-full md:overflow-y-auto">
-      <h1 className="text-2xl text-(--text-primary) my-3 w-full text-center font-semibold">
-        {info?.title}
-      </h1>
-
-      {info?.video_formats.length > 0 && !qualityInfo.isOpen && (
-        <ul className="space-y-4">
-          {info?.video_formats.map((format, index) => (
-            <FormatsListCard
-              key={index}
-              openInfo={() =>
-                setQualityInfo({ isOpen: true, quality: format.quality })
-              }
-              format={format}
-            />
-          ))}
-        </ul>
-      )}
-
-      {qualityInfo.isOpen && (
-        <motion.div
-          initial={{ left: "120vw", opacity: 0.6 }}
-          animate={{ left: "0%", opacity: 1 }}
-          transition={{ duration: 0.75, ease: "easeIn" }}
-        >
-          <QualityInfo
-            info={info}
-            quality={qualityInfo?.quality}
-            closeInfoFn={() =>
-              setQualityInfo((state) => ({ ...state, isOpen: false }))
-            }
+    <section className="px-3 py-4 md:grid md:grid-cols-[70%_30%] gap-3 justify-between mx-auto">
+      <div className="h-full max-h-screen max-w-full aspect-video pb-5">
+        {vidUrl?.length > 0 && (
+          <VideoPlayer
+            posterUrl={info?.thumbnail ?? info?.thumbnail_formats?.[0].url}
+            title={info.title}
+            urls={vidUrl}
           />
-        </motion.div>
-      )}
+        )}
+      </div>
+      <section className="w-full md:h-full md:overflow-y-auto">
+        <h1 className="text-2xl text-(--text-primary) my-3 w-full text-center font-semibold">
+          {info?.title}
+        </h1>
+
+        {info?.video_formats.length > 0 && !qualityInfo.isOpen && (
+          <ul className="space-y-4">
+            {info?.video_formats.map((format, index) => (
+              <FormatsListCard
+                key={index}
+                openInfo={() =>
+                  setQualityInfo({ isOpen: true, quality: format.quality })
+                }
+                format={format}
+              />
+            ))}
+          </ul>
+        )}
+
+        {qualityInfo.isOpen && (
+          <motion.div
+            initial={{ left: "120vw", opacity: 0.6 }}
+            animate={{ left: "0%", opacity: 1 }}
+            transition={{ duration: 0.75, ease: "easeIn" }}
+          >
+            <QualityInfo
+              info={info}
+              quality={qualityInfo?.quality}
+              closeInfoFn={() =>
+                setQualityInfo((state) => ({ ...state, isOpen: false }))
+              }
+            />
+          </motion.div>
+        )}
       </section>
     </section>
   );
