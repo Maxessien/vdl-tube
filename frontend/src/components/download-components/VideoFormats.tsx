@@ -37,7 +37,7 @@ const FormatsListCard = ({
 
 const VideoFormats = ({ id }: { id: string }) => {
   const infos = useSelector((state: RootState) => state.infoMappings);
-  const [vidUrl, setVidUrl] = useState("");
+  const [vidUrl, setVidUrl] = useState<string[]>([]);
   const info = infos?.[id];
 
   if (!info) return notFound();
@@ -51,17 +51,21 @@ const VideoFormats = ({ id }: { id: string }) => {
     const { data } = await resolveDownloadUrl(
       info.key,
       quality,
-      "all",
-      info.url,
+      "video",
+      null,
       info.titleSlug,
     );
-    return `/api/download?url=${data.downloadUrl}`;
+    return `/api/download?url=${data.downloadUrl}&stream=true`;
   };
 
   useEffect(() => {
     (async () => {
-      const url = await getVidUrl(info.video_formats[0].quality.toString());
-      setVidUrl(url);
+      const urls: string[] = []
+      for (const format of info.video_formats){
+        const url = await getVidUrl(format.quality.toString())
+        urls.push(url)
+      }
+      setVidUrl(urls);
     })();
   }, []);
 
@@ -73,7 +77,7 @@ const VideoFormats = ({ id }: { id: string }) => {
         alt={`${info?.title} thumbnail`}
       /> */}
 
-      <VideoPlayer posterUrl={info?.thumbnail ?? info?.thumbnail_formats?.[0].url} title={info.title} url={vidUrl} />
+      {vidUrl?.length > 0 && <VideoPlayer posterUrl={info?.thumbnail ?? info?.thumbnail_formats?.[0].url} title={info.title} urls={vidUrl} />}
       <h1 className="text-2xl text-(--text-primary) my-3 w-full text-center font-semibold">
         {info?.title}
       </h1>

@@ -8,7 +8,6 @@ const infoMappingSlice = createSlice({
     initialState,
     reducers: {
         addInfo: (state, {payload}: {payload: {key: string, info: VideoInfo}})=>{
-            console.log(payload)
             state[payload.key] = payload.info
         },
         removeInfo: (state, {payload}: {payload: {key: string}})=>{

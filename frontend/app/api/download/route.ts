@@ -58,6 +58,7 @@ export async function GET(request: Request) {
   const videoUrl = searchParams.get("url");
   const start = searchParams.get("start");
   const end = searchParams.get("end");
+  const stream = searchParams.get("stream");
   const startTime = parseTimeParam(start);
   const endTime = parseTimeParam(end);
   const hasStart = startTime !== null;
@@ -70,11 +71,12 @@ export async function GET(request: Request) {
   // Return video immediately from url if no range was specified
   if (!hasStart) {
     const res = await fetch(videoUrl);
+    console.log(res.headers.get("Content-Length"))
     return new Response(res.body, {
       headers: {
         "Content-Type": "video/mp4",
-        "Content-Disposition": `attachment;"`,
         "Content-Length": res.headers.get("Content-Length"),
+        ...(!stream?.trim() ? {"Content-Disposition": `attachment;"`} : {}),
       },
     });
   }
@@ -121,8 +123,8 @@ export async function GET(request: Request) {
   return new Response(res.body, {
     headers: {
       "Content-Type": "video/mp4",
-      "Content-Disposition": `attachment;"`,
       "Content-Length": res.headers.get("Content-Length"),
+        ...(!stream?.trim() ? {"Content-Disposition": `attachment;"`} : {}),
     },
   });
 }

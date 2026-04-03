@@ -14,11 +14,11 @@ export interface VideoState {
 }
 
 const VideoPlayer = ({
-  url,
+  urls,
   posterUrl,
   title,
 }: {
-  url: string;
+  urls: string[];
   posterUrl: string;
   title: string;
 }) => {
@@ -40,7 +40,6 @@ const VideoPlayer = ({
       <video
         ref={videoRef}
         className="w-full z-5"
-        src={url}
         preload="metadata"
         poster={posterUrl}
         onPlay={() =>
@@ -65,8 +64,10 @@ const VideoPlayer = ({
             currentTime: 0,
           })
         }
-      ></video>
-      {showControls && (
+      >
+        {urls.map((url)=><source src={url} type="video/mp4"></source>)}
+      </video>
+      {videoState.playbackStarted && showControls && (
         <div className="absolute z-10 w-full flex flex-col h-full top-0 left-0">
           <div className="w-full px-2 py-3 bg-[rgb(0,0,0,0.55)]">
             <p className="text-base text-left font-medium text-(--text-primary)">
@@ -100,10 +101,9 @@ const VideoPlayer = ({
       )}
 
       {!videoState.playbackStarted && (
-        <div className="absolute z-15 w-full flex items-center justify-center h-full top-0 left-0 bg-(--main-secondary-light)">
+        <div className="absolute z-15 w-full flex items-center justify-center h-full top-0 left-0 bg-[rgb(0,0,0,0.5)]">
           <button
             onClick={() => {
-              console.log(videoRef?.current);
               videoRef?.current?.play();
             }}
             className="inline-flex justify-center items-center p-4 text-2xl rounded-full bg-(--main-primary) hover:bg-(--main-primary-light) font-medium text-(--text-primary)"
