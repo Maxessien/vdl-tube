@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { FaPlay } from "react-icons/fa";
 import VideoClickRegister from "./VideoClickRegister";
 import VideoControls from "./VideoControls";
@@ -13,8 +13,8 @@ export interface VideoState {
   currentTime: number;
   loading: boolean;
   seeked: { direction: "forward" | "backward"; active: boolean };
-  expanded: boolean
-  muted: boolean
+  expanded: boolean;
+  muted: boolean;
 }
 
 const VideoPlayer = ({
@@ -36,7 +36,7 @@ const VideoPlayer = ({
     loading: false,
     seeked: { direction: "forward", active: false },
     expanded: false,
-    muted: false
+    muted: false,
   });
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -56,30 +56,61 @@ const VideoPlayer = ({
     );
   };
 
-  
-  
-    useEffect(() => {
-      const handleFullScrChange = () => {
-        if (document.fullscreenElement) setVideoState(state=>({...state, expanded: true}));
-        else setVideoState(state=>({...state, expanded: false}));
-      };
-  
-      document.addEventListener("fullscreenchange", () => {
+  useEffect(() => {
+    const handleFullScrChange = () => {
+      if (document.fullscreenElement)
+        setVideoState((state) => ({ ...state, expanded: true }));
+      else setVideoState((state) => ({ ...state, expanded: false }));
+    };
+
+    document.addEventListener("fullscreenchange", () => {
+      handleFullScrChange();
+    });
+
+    const removeAllListeners = () => {
+      document.removeEventListener("fullscreenchange", () => {
         handleFullScrChange();
       });
-  
-      const removeAllListeners = () => {
-        document.removeEventListener("fullscreenchange", () => {
-          handleFullScrChange();
-        });
-      };
-  
-      return removeAllListeners();
-    }, []);
-  
+    };
+
+    return removeAllListeners();
+  }, []);
+
+  const handleKeyEvent = ({ key }: KeyboardEvent<HTMLDivElement>) => {
+    const vidRef = videoRef?.current;
+    if (!vidRef) return;
+
+    switch (key) {
+      case " ":
+        videoState.paused
+          ? videoRef?.current?.play()
+          : videoRef?.current?.pause();
+        break;
+      case "ArrowUp":
+        if (vidRef.volume < 0.95) vidRef.volume += 0.05;
+        break;
+      case "ArrowDown":
+        if (vidRef.volume > 0.05) vidRef.volume -= 0.05;
+        break;
+      case "ArrowRight":
+        seek(10, "forward");
+        break;
+      case "ArrowLeft":
+        seek(-10, "backward");
+        break;
+      default:
+        break;
+    }
+  };
 
   return (
-    <div className="h-full w-max max-w-full relative">
+    <div
+      tabIndex={1}
+      onKeyDown={(e) => {
+        if (videoState.expanded) handleKeyEvent(e);
+      }}
+      className="h-full w-max max-w-full relative focus:outline-0"
+    >
       <video
         ref={videoRef}
         className="h-full z-5"
@@ -104,14 +135,14 @@ const VideoPlayer = ({
             currentTime: Number.isFinite(time) ? time : 0,
           }));
         }}
-        onLoadStart={()=>{
-          setVideoState(state=>({...state, loading: true}))
+        onLoadStart={() => {
+          setVideoState((state) => ({ ...state, loading: true }));
         }}
-        onCanPlay={()=>{
-          setVideoState(state=>({...state, loading: false}))
+        onCanPlay={() => {
+          setVideoState((state) => ({ ...state, loading: false }));
         }}
         onEnded={() =>
-          setVideoState(state=>({
+          setVideoState((state) => ({
             ...state,
             paused: true,
             playbackStarted: false,
@@ -120,9 +151,9 @@ const VideoPlayer = ({
             seeked: { direction: "forward", active: false },
           }))
         }
-        onVolumeChange={(e)=>{
-          const bool = e?.currentTarget?.muted || false
-          setVideoState(state=>({...state, muted: bool}))
+        onVolumeChange={(e) => {
+          const bool = e?.currentTarget?.muted || false;
+          setVideoState((state) => ({ ...state, muted: bool }));
         }}
       >
         {urls.map((url) => (
