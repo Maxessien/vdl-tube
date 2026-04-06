@@ -71,7 +71,7 @@ const VideoControls = ({
           <MdForward10 size={width < 480 ? 22 : 27} />
         </button>
       </div>
-      <div className="flex-1 flex justify-end">
+      <div className="flex-1 flex gap-2 justify-end">
         <button
           className="inline-flex w-max justify-start items-center hover:bg-(--main-secondary-light) rounded-full p-0.5 sm:p-1 font-medium text-(--text-primary)"
           onClick={() =>

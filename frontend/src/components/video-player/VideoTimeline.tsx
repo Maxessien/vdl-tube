@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/refs */
 import { secondsToTimestamp } from "@/src/utils/downloader";
 import { RefObject, useState } from "react";
 import { VideoState } from "./VideoPlayer";
@@ -25,8 +26,8 @@ const VideoTimeline = ({
     <div className="flex w-full leading-px gap-2 sm:gap-3 justify-between items-center">
       <span className="text-[11px] sm:text-sm font-medium text-(--text-primary)">
         {secondsToTimestamp(
-          videoState.currentTime,
-          videoRef?.current?.duration < 60 * 60,
+          videoState.currentTime ?? 0,
+          (videoRef?.current?.duration ?? 0) < 60 * 60,
         )}
       </span>
       <div
@@ -64,8 +65,8 @@ const VideoTimeline = ({
       </div>
       <span className="text-[11px] sm:text-sm font-medium text-(--text-primary)">
         {secondsToTimestamp(
-          videoRef?.current?.duration,
-          videoRef?.current?.duration < 60 * 60,
+          videoRef?.current?.duration ?? 0,
+          (videoRef?.current?.duration ?? 0) < 60 * 60,
         )}
       </span>
     </div>

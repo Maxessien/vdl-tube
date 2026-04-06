@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FaArrowRight } from "react-icons/fa";
 import { useSelector } from "react-redux";
+import { v4 } from "uuid";
 import LoadRoller from "../reusable-components/LoadRoller";
 import VideoPlayer from "../video-player/VideoPlayer";
 import QualityInfo from "./QualityInfo";
@@ -36,28 +37,33 @@ const FormatsListCard = ({
   );
 };
 
+export interface UrlInfo {
+  url: string;
+  quality: number;
+  id: string;
+}
+
 const VideoFormats = ({ id }: { id: string }) => {
   const infos = useSelector((state: RootState) => state.infoMappings);
-  const [vidUrl, setVidUrl] = useState<string>("");
+  const [vidUrls, setVidUrls] = useState<UrlInfo[]>([]);
   const info = infos?.[id];
-
-  console.log(info, id)
-
-  if (!info) return notFound();
 
   const [qualityInfo, setQualityInfo] = useState<{
     isOpen: boolean;
     quality: number;
-  }>({ isOpen: false, quality: info.video_formats?.[0].quality });
+  }>({
+    isOpen: false,
+    quality: info?.video_formats?.[0].quality,
+  });
 
   const getVidUrl = async (quality: string) => {
     try {
       const { data } = await resolveDownloadUrl(
-        info.key,
+        info?.key,
         quality,
         "video",
         null,
-        info.titleSlug,
+        info?.titleSlug,
       );
       if (!data) return null;
       return `/api/download?url=${data?.downloadUrl}&stream=true`;
@@ -67,42 +73,53 @@ const VideoFormats = ({ id }: { id: string }) => {
   };
 
   useEffect(() => {
+    let isMounted = true;
     (async () => {
-      let url: string;
-
+      if (!info) return;
       for (const format of info.video_formats) {
+        if (!isMounted) break;
         const formatUrl = await getVidUrl(format.quality.toString());
         if (formatUrl) {
-          url = formatUrl;
-          break
+          setVidUrls((state) => [
+            ...state,
+            {
+              quality: format.quality,
+              url: formatUrl,
+              id: v4(),
+            },
+          ]);
         }
       }
-      setVidUrl(url ?? "");
     })();
+
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  if (!info) return notFound();
 
   return (
     <section className="md:grid md:grid-cols-[70%_30%] gap-3 md:justify-between mx-auto">
       <div className="md:h-full max-h-screen md:px-3 md:py-4 w-full md:w-auto max-w-full pb-5 aspect-video">
-        {vidUrl?.trim()?.length > 0 ? (
+        {vidUrls?.length > 0 ? (
           <VideoPlayer
             posterUrl={info?.thumbnail ?? info?.thumbnail_formats?.[0].url}
-            title={info.title}
-            url={vidUrl}
+            title={info?.title}
+            urls={vidUrls}
           />
         ) : (
           <div className="max-w-4xl w-full relative aspect-video">
             <div className="absolute z-5 w-full flex items-center justify-center h-full top-0 left-0 bg-[rgb(0,0,0,0.4)]">
               <div className="bg-[rgb(0,0,0,0.8)] w-13 h-13 sm:w-20 sm:h-20 rounded-full p-3">
-                <LoadRoller
-                  strokeWidth={7}
-                  className="text-(--text-primary)"
-                />
+                <LoadRoller strokeWidth={7} className="text-(--text-primary)" />
               </div>
             </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={info?.thumbnail ?? info?.thumbnail_formats?.[0].url}
-              alt={info.title}
+              alt={info?.title}
               className="w-full"
             />
           </div>
@@ -113,13 +130,16 @@ const VideoFormats = ({ id }: { id: string }) => {
           {info?.title}
         </h1>
 
-        {info?.video_formats.length > 0 && !qualityInfo.isOpen && (
+        {(info?.video_formats?.length ?? 0) > 0 && !qualityInfo?.isOpen && (
           <ul className="space-y-4">
             {info?.video_formats.map((format, index) => (
               <FormatsListCard
                 key={index}
                 openInfo={() =>
-                  setQualityInfo({ isOpen: true, quality: format.quality })
+                  setQualityInfo({
+                    isOpen: true,
+                    quality: format.quality,
+                  })
                 }
                 format={format}
               />
@@ -127,7 +147,7 @@ const VideoFormats = ({ id }: { id: string }) => {
           </ul>
         )}
 
-        {qualityInfo.isOpen && (
+        {qualityInfo?.isOpen && (
           <motion.div
             initial={{ left: "120vw", opacity: 0.6 }}
             animate={{ left: "0%", opacity: 1 }}
