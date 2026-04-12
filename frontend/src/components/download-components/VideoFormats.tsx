@@ -76,7 +76,7 @@ const VideoFormats = ({ id }: { id: string }) => {
     let isMounted = true;
     (async () => {
       if (!info) return;
-      for (const format of info.video_formats) {
+      for (const format of info.video_formats?.reverse()) {
         if (!isMounted) break;
         const formatUrl = await getVidUrl(format.quality.toString());
         if (formatUrl) {
