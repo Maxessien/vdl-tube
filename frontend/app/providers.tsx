@@ -20,7 +20,7 @@ const AppProviders = ({ children }: AppProvidersProps) => {
         setScreenSize({
           width: window.innerWidth,
           height: window.innerHeight,
-        })
+        }),
       );
     };
 
@@ -32,11 +32,11 @@ const AppProviders = ({ children }: AppProvidersProps) => {
     };
   }, []);
 
-  return <QueryClientProvider client={queryClient}>
-    <Provider store={store}>
-      {children}
-    </Provider>
-  </QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Provider store={store}>{children}</Provider>
+    </QueryClientProvider>
+  );
 };
 
 export default AppProviders;

@@ -1,17 +1,25 @@
 import AppHeader from "@/src/components/layouts-components/AppHeader";
 import TopLoader from "@/src/components/reusable-components/TopLoader";
 import "@/src/index.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../src/assets/css-reusable/variables.css";
 import AppProviders from "./providers";
 
+export const viewport: Viewport = {
+  themeColor: "#000000",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 export const metadata: Metadata = {
   title: "VDL Tube",
   icons: {
     icon: "/vdl_tube_logo_transparent.png",
+    apple: "/apple-touch-icon.png",
   },
 };
 
