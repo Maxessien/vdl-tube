@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import { v4 } from "uuid";
 import { addInfo } from "../store-slices/infoMappingsSlice";
 import logger from "../utils/logger";
-import { getVideoInfo } from "../utils/mate";
+import { getVideoInfo, resolveDownloadUrl } from "../utils/mate";
 
 const useSearch = () => {
   const [isFetching, setIsFetching] = useState<boolean>(false);

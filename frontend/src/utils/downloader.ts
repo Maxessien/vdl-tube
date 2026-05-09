@@ -1,18 +1,20 @@
 import { v4 } from "uuid";
 import { resolveDownloadUrl } from "./mate";
 
-export const downloadVideo = async (
+
+export const downloadFile = async (
   vidKey: string,
   quality: number,
   titleSlug: string,
   title: string,
+  type: "audio" | "video" | "all",
   start?: number,
   end?: number,
 ) => {
   const downloadUrlRes = await resolveDownloadUrl(
     vidKey,
     `${quality}`,
-    "video",
+    type,
     null,
     titleSlug,
   );
@@ -20,8 +22,9 @@ export const downloadVideo = async (
   const hasStart = Number.isFinite(start);
   const hasEnd = Number.isFinite(end);
   const link = document.createElement("a");
-  link.href = `/api/download?url=${data.downloadUrl}${hasStart ? `&start=${start}` : ""}${hasStart && hasEnd && Number(start) < Number(end) ? `&end=${end}` : ""}`;
-  const downloadFilename = title && quality ? `${title}-${quality}P.mp4` : `${v4()}.mp4`
+  const ext = type === "audio" ? "mp3" : "mp4"
+  link.href = `/api/download?url=${data.downloadUrl}${hasStart ? `&start=${start}&type=${type}` : ""}${hasStart && hasEnd && Number(start) < Number(end) ? `&end=${end}` : ""}`;
+  const downloadFilename = title && quality ? `${title}-${quality}${type==="audio" ? "K" : "P"}.${ext}` : `${v4()}.${ext}`
   link.download = downloadFilename;
   link.click();
   return { finished: true };

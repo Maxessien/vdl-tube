@@ -1,7 +1,7 @@
 "use client";
 
 import { RootState } from "@/src/store";
-import type { VideoFormat } from "@/src/types/matesTypes";
+import type { AudioFormat, VideoFormat } from "@/src/types/matesTypes";
 import { resolveDownloadUrl } from "@/src/utils/mate";
 import { motion } from "framer-motion";
 import { notFound } from "next/navigation";
@@ -16,16 +16,19 @@ import QualityInfo from "./QualityInfo";
 const FormatsListCard = ({
   format,
   openInfo,
+  type,
 }: {
-  format: VideoFormat;
+  format: VideoFormat | AudioFormat;
   openInfo: () => void;
+  type: "audio" | "video";
 }) => {
   const { quality } = format;
 
   return (
     <li className="w-full flex justify-between items-center px-3 py-5 space-y-3 text-left rounded-md bg-(--main-secondary-light) shadow-md shadow-gray-700">
       <p className="text-xl text-(--text-primary) font-bold">
-        Quality - {quality}P
+        Quality - {quality}
+        {type === "audio" ? "K" : "P"}
       </p>
       <button
         onClick={openInfo}
@@ -47,6 +50,7 @@ const VideoFormats = ({ id }: { id: string }) => {
   const infos = useSelector((state: RootState) => state.infoMappings);
   const [vidUrls, setVidUrls] = useState<UrlInfo[]>([]);
   const info = infos?.[id];
+  const [formatView, setFormatView] = useState<"audio" | "video">("video");
 
   const [qualityInfo, setQualityInfo] = useState<{
     isOpen: boolean;
@@ -76,7 +80,8 @@ const VideoFormats = ({ id }: { id: string }) => {
     let isMounted = true;
     (async () => {
       if (!info) return;
-      for (const format of info.video_formats?.reverse()) {
+      const formats = [...info.video_formats];
+      for (const format of formats?.reverse()) {
         if (!isMounted) break;
         const formatUrl = await getVidUrl(format.quality.toString());
         if (formatUrl) {
@@ -130,20 +135,68 @@ const VideoFormats = ({ id }: { id: string }) => {
           {info?.title}
         </h1>
 
-        {(info?.video_formats?.length ?? 0) > 0 && !qualityInfo?.isOpen && (
+        <div className="flex mb-3 w-full items-end">
+          <button
+            onClick={() => {
+              setQualityInfo((state) => ({ ...state, isOpen: false }));
+              setFormatView("video");
+            }}
+            className={`flex-1 ${formatView === "video" ? "border-b-2 border-b-(--main-primary)" : ""} hover:bg-(--main-secondary-light) font-semibold px-2 py-3 text-(--text-primary) text-xl`}
+          >
+            Video
+          </button>
+          <button
+            onClick={() => {
+              setQualityInfo((state) => ({ ...state, isOpen: false }));
+              setFormatView("audio");
+            }}
+            className={`flex-1 ${formatView === "audio" ? "border-b-2 border-b-(--main-primary)" : ""} hover:bg-(--main-secondary-light) font-semibold px-2 py-3 text-(--text-primary) text-xl`}
+          >
+            Audio
+          </button>
+        </div>
+
+        {!qualityInfo?.isOpen && (
           <ul className="space-y-4">
-            {info?.video_formats.map((format, index) => (
-              <FormatsListCard
-                key={index}
-                openInfo={() =>
-                  setQualityInfo({
-                    isOpen: true,
-                    quality: format.quality,
-                  })
-                }
-                format={format}
-              />
-            ))}
+            {formatView === "video" ? (
+              info?.video_formats.length > 0 ? (
+                info?.video_formats.map((format, index) => (
+                  <FormatsListCard
+                    key={index}
+                    openInfo={() =>
+                      setQualityInfo({
+                        isOpen: true,
+                        quality: format.quality,
+                      })
+                    }
+                    format={format}
+                    type={formatView}
+                  />
+                ))
+              ) : (
+                <p className="w-full text-center text-(--text-primary) text-lg font-semibold">
+                  No Video format
+                </p>
+              )
+            ) : info.audio_formats.length > 0 ? (
+              info?.audio_formats.map((format, index) => (
+                <FormatsListCard
+                  key={index}
+                  openInfo={() =>
+                    setQualityInfo({
+                      isOpen: true,
+                      quality: format.quality,
+                    })
+                  }
+                  format={format}
+                  type={formatView}
+                />
+              ))
+            ) : (
+              <p className="w-full text-center text-(--text-primary) text-lg font-semibold">
+                No Audio format
+              </p>
+            )}
           </ul>
         )}
 
@@ -159,6 +212,7 @@ const VideoFormats = ({ id }: { id: string }) => {
               closeInfoFn={() =>
                 setQualityInfo((state) => ({ ...state, isOpen: false }))
               }
+              formatType={formatView}
             />
           </motion.div>
         )}

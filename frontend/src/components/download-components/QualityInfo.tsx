@@ -1,6 +1,6 @@
 import LoadRoller from "@/src/components/reusable-components/LoadRoller";
 import type { VideoInfo } from "@/src/types/matesTypes";
-import { downloadVideo, getYouTubeID } from "@/src/utils/downloader";
+import { downloadFile, getYouTubeID } from "@/src/utils/downloader";
 import logger from "@/src/utils/logger";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
@@ -10,15 +10,15 @@ import { FaArrowLeft } from "react-icons/fa";
 import { toast } from "react-toastify";
 import Chapters from "./Chapters";
 import RangeDownload from "./RangeDownload";
-import { getVideoChapters } from "@/src/utils/youtubei";
 
 interface QualityInfo {
   info: VideoInfo;
   quality: number;
   closeInfoFn: () => void;
+  formatType: "audio" | "video"
 }
 
-const QualityInfo = ({ info, closeInfoFn, quality }: QualityInfo) => {
+const QualityInfo = ({ info, closeInfoFn, quality, formatType }: QualityInfo) => {
   const { key, duration, title, titleSlug, url } = info;
   const [downloading, setDownloading] = useState({ isActive: true, type: "" });
   const { mutateAsync, isPending } = useMutation({
@@ -35,22 +35,23 @@ const QualityInfo = ({ info, closeInfoFn, quality }: QualityInfo) => {
     }) => {
       setDownloading({ isActive: true, type: type });
       if (type === "range")
-        toast.warn("Range downloads takes more time to process videos");
+        toast.warn("Range downloads takes more time to process video/audio");
       if (type.trim().startsWith("chapter"))
         toast.warn(
-          "Chapter downloads takes more time to process and trim videos",
+          "Chapter downloads takes more time to process and trim video/audio",
         );
-      return downloadVideo(
+      return downloadFile(
         key,
         quality,
         titleSlug,
         title,
+        formatType,
         start ?? undefined,
         end ?? undefined,
       );
     },
-    onSuccess: () => toast.success("Video download started"),
-    onError: () => toast.error("Video download failed"),
+    onSuccess: () => toast.success((formatType === "audio" ? "Audio" : "Video") + " download started"),
+    onError: () => toast.error((formatType === "audio" ? "Audio" : "Video") + " download failed"),
     onSettled: () => setDownloading((state) => ({ ...state, isActive: false })),
   });
 
@@ -86,6 +87,8 @@ const QualityInfo = ({ info, closeInfoFn, quality }: QualityInfo) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  console.log(formatType)
+
   return (
     <>
       <section>
@@ -104,11 +107,11 @@ const QualityInfo = ({ info, closeInfoFn, quality }: QualityInfo) => {
         >
           {downloading.isActive && downloading.type === "full" ? (
             <>
-              <span className="sr-only">Downloading full video</span>
+              <span className="sr-only">Downloading full{" "}{(formatType === "audio" ? "Audio" : "Video")}</span>
               <LoadRoller size={24} duration={0.7} />
             </>
           ) : (
-            "Download Full Video"
+            "Download Full " + (formatType === "audio" ? "Audio" : "Video")
           )}
         </button>
       </section>

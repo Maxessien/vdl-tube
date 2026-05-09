@@ -17,6 +17,7 @@ if (resolvedFfmpegPath) ffmpeg.setFfmpegPath(resolvedFfmpegPath);
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const videoUrl = searchParams.get("url");
+  const fileType = searchParams.get("type") as "audio" | "video";
   const start = searchParams.get("start");
   const end = searchParams.get("end");
   const stream = searchParams.get("stream");
@@ -35,7 +36,7 @@ export async function GET(request: Request) {
     const res = await fetch(videoUrl, { headers });
     return new Response(res.body, {
       headers: {
-        "Content-Type": "video/mp4",
+        "Content-Type": fileType === "audio" ? "audio/mp3" : "video/mp4",
         "Content-Length": res.headers.get("Content-Length") || "",
         ...(!stream?.trim()
           ? { "Content-Disposition": `attachment;"` }
@@ -56,7 +57,7 @@ export async function GET(request: Request) {
   const command = ffmpeg(videoUrl)
     .videoCodec("copy")
     .audioCodec("copy")
-    .format("mp4")
+    .format(fileType === "audio" ? "mp3" : "mp4")
     .setStartTime(startTime)
     .outputOptions("-movflags frag_keyframe+empty_moov");
 
@@ -65,7 +66,7 @@ export async function GET(request: Request) {
   const cloudinaryRes: UploadApiResponse = await new Promise(
     (resolve, reject) => {
       const stream = uploader.upload_stream(
-        { folder: "/vdl-tube", resource_type: "video" },
+        { folder: "/vdl-tube", resource_type: fileType === "audio" ? "auto" : "video" },
         (err, result) => {
           if (err) {
             logger.error("Cloudnary upload err", err);
@@ -83,7 +84,7 @@ export async function GET(request: Request) {
 
   return new Response(res.body, {
     headers: {
-      "Content-Type": "video/mp4",
+      "Content-Type": fileType === "audio" ? "audio/mp3" : "video/mp4",
       "Content-Length": res.headers.get("Content-Length"),
       "Content-Disposition": `attachment;"`,
     },
