@@ -11,7 +11,7 @@ import { FaDownload } from "react-icons/fa";
 const AppHeader = () => {
   const router = useRouter();
   const pwaRef = useRef<PWAInstallElement>(null);
-  const [canInstall, setCanInstall] = useState(true);
+  const [canInstall, setCanInstall] = useState(false);
 
   const triggerInstall = () => {
     if (!canInstall || !pwaRef.current) return;
@@ -27,22 +27,48 @@ const AppHeader = () => {
       setCanInstall(false);
     };
 
+    const handleChoiceEvent = (e: any) => {
+      pwaElement.userChoiceResult === "accepted"
+        ? handlePwaInstalled()
+        : handlePwaAvailable(e);
+    };
+
     const pwaElement = pwaRef.current;
     if (pwaElement) {
-      pwaElement.addEventListener("pwa-install-available", handlePwaAvailable);
-      pwaElement.addEventListener("pwa-install-success", handlePwaInstalled);
+      pwaElement.addEventListener(
+        "pwa-install-available-event",
+        handlePwaAvailable,
+      );
+      pwaElement.addEventListener(
+        "pwa-user-choice-result-event",
+        handleChoiceEvent,
+      );
+      pwaElement.addEventListener(
+        "pwa-install-success-event",
+        handlePwaInstalled,
+      );
     }
 
     return () => {
       if (pwaElement) {
-        pwaElement.removeEventListener("pwa-install-available", handlePwaAvailable);
-        pwaElement.removeEventListener("pwa-install-success", handlePwaInstalled);
+        pwaElement.removeEventListener(
+          "pwa-install-available-event",
+          handlePwaAvailable,
+        );
+        pwaElement.removeEventListener(
+          "pwa-user-choice-result-event",
+          handleChoiceEvent,
+        );
+        pwaElement.removeEventListener(
+          "pwa-install-success-event",
+          handlePwaInstalled,
+        );
       }
     };
   }, []);
 
   return (
-    <header className="flex flex-wrap justify-between w-full items-center gap-3 sm:px-5 md:px-6 lg:px-8 px-3 py-4">
+    <header className="flex flex-wrap justify-between items-center gap-3 sm:px-5 md:px-6 lg:px-8 px-3 py-4">
       <div
         onClick={() => router.push("/")}
         className="flex justify-start gap-2 cursor-pointer items-center"
@@ -52,15 +78,21 @@ const AppHeader = () => {
           <span>VDL</span> <span className="text-[#ff8800]">Tube</span>
         </h1>
       </div>
-      <pwa-install manifest-url="/manifest.webmanifest" ref={pwaRef}></pwa-install>
-      {canInstall && (
-        <button 
-          onClick={triggerInstall}
-          className="bg-[#7a470d] text-(--text-primary) flex gap-2 items-center justify-center px-4 py-2 rounded-full font-medium text-sm transition-opacity hover:opacity-90"
-        >
-         <span><FaDownload /></span> <span>Install App</span>
-        </button>
-      )}
+      <pwa-install
+        manifest-url="/manifest.webmanifest"
+        ref={pwaRef}
+        ></pwa-install>
+        {canInstall && (
+          <button
+            onClick={triggerInstall}
+            className="bg-[#703e04] flex gap-2 justify-center items-center text-(--text-primary) px-3 py-2.5 rounded-full font-medium text-sm sm:text-base transition-opacity hover:opacity-90"
+          >
+            <span>
+              <FaDownload />
+            </span>{" "}
+            <span>Install App</span>
+          </button>
+        )}
     </header>
   );
 };
