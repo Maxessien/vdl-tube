@@ -1,10 +1,11 @@
 "use client";
 
+import useSearch from "@/src/hooks/useSearch";
+import { useRouter } from "nextjs-toploader/app";
 import type { ChangeEvent } from "react";
 import { useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import LoadRoller from "../reusable-components/LoadRoller";
-import useSearch from "@/src/hooks/useSearch";
 
 
 
@@ -18,6 +19,8 @@ const Search = () => {
   };
 
   const {search, isFetching} = useSearch()
+
+  const router = useRouter()
 
   return (
     <div className="w-full flex justify-start items-center pl-2 bg-(--main-secondary-light) rounded-full">
@@ -33,6 +36,8 @@ const Search = () => {
         onChange={handleInputChange}
         className="w-full placeholder:text-base placeholder:text-(--text-primary-light) rounded-[0px_9999px_9999px_0px] focus:outline-0 py-3 px-2 font-medium text-lg text-(--text-primary)"
         type="text"
+        onClick={()=> router.push("/query")}
+        onFocus={()=> router.push("/query")}
       />
     </div>
   );

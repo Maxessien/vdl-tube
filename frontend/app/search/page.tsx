@@ -27,8 +27,8 @@ const SearchPage = async ({
 
         {searchResult?.length > 0 ? (
           <ul className="w-full mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 max-w-7xl gap-3">
-            {searchResult.map((result) => {
-              return <ResultCard result={result} />;
+            {searchResult.map((result, idx) => {
+              return <ResultCard key={idx} result={result} />;
             })}
           </ul>
         ) : (
