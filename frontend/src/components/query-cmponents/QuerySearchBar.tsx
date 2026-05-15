@@ -38,7 +38,9 @@ const QuerySearchBar = () => {
   return (
     <section className="space-y-3 max-w-5xl mx-auto">
       <form
-        onSubmit={() => {
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!(query.trim().length > 0)) return;
           router.push(`/search?query=${query}`);
         }}
         className="w-full relative"
