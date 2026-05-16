@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "nextjs-toploader/app";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { FaSearch } from "react-icons/fa";
+import LoadRoller from "../reusable-components/LoadRoller";
 
 const QuerySearchBar = () => {
   const [query, setQuery] = useState("");
@@ -67,7 +68,11 @@ const QuerySearchBar = () => {
       </form>
 
       <ul className="w-full px-1 sm:px-3 gap-2 items-start flex flex-col">
-        {suggestions.length > 0 ? (
+        {isPending ? (
+          <div className="w-full flex text-(--text-primary) justify-center items-center mt-2">
+            <div className="w-18 aspect-square"><LoadRoller strokeWidth={8} /></div>
+          </div>
+        ) : suggestions.length > 0 ? (
           suggestions.map((s, idx) => (
             <li
               className="w-full"

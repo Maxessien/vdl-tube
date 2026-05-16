@@ -4,7 +4,7 @@ import NextTopLoader from 'nextjs-toploader';
 
 const TopLoader = () => {
   return (
-    <NextTopLoader color="#943b00" height={4} showSpinner={false} />
+    <NextTopLoader color="#ae4500" height={4} showSpinner={false} />
   )
 }
 

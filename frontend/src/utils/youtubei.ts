@@ -1,6 +1,6 @@
 import { Innertube, UniversalCache, YTNodes } from "youtubei.js";
 import logger from "./logger";
-
+"frontend\node_modules\youtubei.js\dist\src\parser\classes\misc\Author.d.ts"
 
 const youtube = await Innertube.create({
   cache: new UniversalCache(true, "/tmp/ytjs-cache"),
@@ -11,32 +11,22 @@ const searchVideo = async (query: string) => {
     if (!query?.toString()?.trim()) throw new Error("Invalid query");
 
     const vids = await youtube.search(query.toString());
-    const filtered = vids.videos.filter(
-      (item) => item.is(YTNodes.Video) || item.is(YTNodes.CompactVideo),
-    );
-    return filtered.map(
-      ({
-        title,
-        video_id,
-        thumbnails,
-        best_thumbnail,
-        duration,
-        view_count,
-      }) => ({
-        title: title.toString(),
-        video_id,
-        thumbnails: best_thumbnail
-          ? [best_thumbnail.url, ...thumbnails.map(({ url }) => url)]
-          : thumbnails.map(({ url }) => url),
-        duration,
-        view_count: view_count.toString(),
-      }),
-    );
+    return vids;
   } catch (err) {
-    console.log(err);
-    return [];
+    logger.error("Search video err", err);
+    return null;
   }
 };
+
+const getPlaylist = async(id: string)=>{
+  try {
+    const playlist = await youtube.getPlaylist(id)
+    return playlist
+  } catch (err) {
+    logger.error("Get playlst err", err);
+    return null
+  }
+}
 
 const getVideoChapters = async (videoId: string) => {
   try {
@@ -66,5 +56,5 @@ const getSearchSuggestions = async(query: string)=>{
   }
 }
 
-export { getSearchSuggestions, getVideoChapters, searchVideo, youtube };
+export { getSearchSuggestions, getVideoChapters, searchVideo, youtube, getPlaylist };
 

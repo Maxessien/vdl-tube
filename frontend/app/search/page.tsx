@@ -1,8 +1,12 @@
-import ResultCard from "@/src/components/search-result-components/ResultCard";
+import SearchResults from "@/src/components/search-result-components/SearchResults";
+import {
+  SerializedPlaylistResult,
+  SerializedVideoResult,
+} from "@/src/types/matesTypes";
 import { searchVideo } from "@/src/utils/youtubei";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-
+import { YTNodes } from "youtubei.js";
 
 export const metadata: Metadata = {
   title: "VDL Tube - Search",
@@ -16,6 +20,51 @@ const SearchPage = async ({
   const { query } = await searchParams;
   if (!query.trim()) return notFound();
   const searchResult = await searchVideo(query);
+  const videos = searchResult?.videos?.filter(
+    (item) => item.is(YTNodes.Video) || item.is(YTNodes.CompactVideo),
+  );
+  const playlists = searchResult?.playlists?.filter(
+    (p) => p.is(YTNodes.Playlist) || p.is(YTNodes.GridPlaylist),
+  );
+
+  // Serialize videos to plain objects for Client Component
+  const serializedVideos: SerializedVideoResult[] = videos?.map((video: any) => ({
+    video_id: video.video_id,
+    title: video.title.toString(),
+    view_count: video.view_count?.toString() || "0",
+    best_thumbnail: {
+      url: video.best_thumbnail?.url || "",
+    },
+    author: {
+      name: video.author?.name || "",
+      best_thumbnail: {
+        url: video.author?.best_thumbnail?.url || "",
+      },
+    },
+  }));
+
+  // Serialize playlists to plain objects for Client Component
+  const serializedPlaylists: SerializedPlaylistResult[] = playlists?.map(
+    (playlist: any) => {
+      let authorName = "Unknown";
+      let authorThumbnail = undefined;
+      if (playlist.author) {
+        if (typeof playlist.author === "string") {
+          authorName = playlist.author;
+        } else if (typeof playlist.author === "object") {
+          authorName = playlist.author.name || playlist.author.toString() || "Unknown";
+          authorThumbnail = playlist.author.best_thumbnail?.url;
+        }
+      }
+      return {
+        id: playlist.id,
+        author: authorName,
+        authorThumbnail,
+        thumbnails: playlist.thumbnails || [],
+      };
+    }
+  );
+
   return (
     <>
       <section>
@@ -25,17 +74,10 @@ const SearchPage = async ({
           </h2>
         </header>
 
-        {searchResult?.length > 0 ? (
-          <ul className="w-full mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 max-w-7xl gap-3">
-            {searchResult.map((result, idx) => {
-              return <ResultCard key={idx} result={result} />;
-            })}
-          </ul>
-        ) : (
-          <p className="text-lg font-medium w-full text-center text-(--text-primary)">
-            No Videos Found
-          </p>
-        )}
+        <SearchResults
+          playlists={serializedPlaylists}
+          videos={serializedVideos}
+        />
       </section>
     </>
   );

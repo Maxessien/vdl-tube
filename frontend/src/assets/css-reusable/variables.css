@@ -1,6 +1,6 @@
 :root{
     --main-primary: rgb(120, 48, 0);
-    --main-primary-light: rgb(148, 59, 0);
+    --main-primary-light: #ae4500;
     --main-secondary: rgb(27, 27, 27);
     --main-secondary-light: rgb(51, 51, 51);
     --text-primary: rgb(237, 237, 237);

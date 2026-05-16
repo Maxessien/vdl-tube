@@ -10,18 +10,15 @@ interface LoadRollerProps {
   duration?: number;
 }
 
-const LoadRoller = ({ className = "", size, strokeWidth = 8, duration = 1 }: LoadRollerProps) => {
+const LoadRoller = ({ className = "", size, strokeWidth = 6, duration = 1 }: LoadRollerProps) => {
   const containerStyle: CSSProperties = {
     width: size ? `${size}px` : "100%",
     height: size ? `${size}px` : "100%",
     display: "inline-block",
   };
 
-  const circlePercentage = 0.7;
   const radius = 45;
   const circumference = 2 * Math.PI * radius;
-  const strokeDasharray = circumference;
-  const strokeDashoffset = circumference * (1 - circlePercentage);
 
   return (
     <div style={containerStyle}>
@@ -34,23 +31,52 @@ const LoadRoller = ({ className = "", size, strokeWidth = 8, duration = 1 }: Loa
         }}
         animate={{ rotate: 360 }}
         transition={{
-          duration: duration * 2,
+          duration: duration * 1.5,
           repeat: Infinity,
           ease: "linear",
           repeatType: "loop",
         }}
       >
+        {/* Outer rotating ring with gradient effect */}
+        <defs>
+          <linearGradient id="loaderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="currentColor" stopOpacity="1" />
+            <stop offset="100%" stopColor="currentColor" stopOpacity="0.3" />
+          </linearGradient>
+        </defs>
+        
+        {/* Main animated circle */}
+        <motion.circle
+          cx="50"
+          cy="50"
+          r={radius}
+          fill="transparent"
+          stroke="url(#loaderGradient)"
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference * 0.25}
+          strokeDashoffset={0}
+          strokeLinecap="round"
+          animate={{
+            strokeDashoffset: -circumference,
+          }}
+          transition={{
+            duration: duration * 1.5,
+            repeat: Infinity,
+            ease: "linear",
+            repeatType: "loop",
+          }}
+          className={className}
+        />
+        
+        {/* Secondary subtle circle for depth */}
         <circle
           cx="50"
           cy="50"
           r={radius}
           fill="transparent"
           stroke="currentColor"
-          strokeWidth={strokeWidth}
-          strokeDasharray={strokeDasharray}
-          strokeDashoffset={strokeDashoffset}
-          strokeLinecap="round"
-          className={className}
+          strokeWidth={strokeWidth * 0.5}
+          opacity="0.1"
         />
       </motion.svg>
     </div>

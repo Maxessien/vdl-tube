@@ -1,3 +1,5 @@
+import { YTNodes } from "youtubei.js";
+
 export interface AudioFormat {
   quality: number;
   label: string;
@@ -44,13 +46,21 @@ export interface DownloadUrlResult {
   data: { downloadUrl: string } | null;
 }
 
-export interface SearchResult {
-  title: string;
+export type SearchResultVideos = YTNodes.Video | YTNodes.CompactVideo
+export type SearchResultPlaylist = YTNodes.Playlist | YTNodes.GridPlaylist
+
+// Serializable versions for Server to Client Component passing
+export interface SerializedVideoResult {
   video_id: string;
-  thumbnails: string[];
-  duration: {
-    text: string | undefined;
-    seconds: number;
-  };
+  title: string;
   view_count: string;
+  best_thumbnail: { url: string };
+  author: { name: string; best_thumbnail: { url: string } };
+}
+
+export interface SerializedPlaylistResult {
+  id: string;
+  author: string;
+  authorThumbnail?: string;
+  thumbnails: Array<{ url: string; width?: number }>;
 }
