@@ -1,6 +1,7 @@
-import { Innertube, UniversalCache, YTNodes } from "youtubei.js";
+"use server"
+
+import { Innertube, UniversalCache } from "youtubei.js";
 import logger from "./logger";
-"frontend\node_modules\youtubei.js\dist\src\parser\classes\misc\Author.d.ts"
 
 const youtube = await Innertube.create({
   cache: new UniversalCache(true, "/tmp/ytjs-cache"),
@@ -56,5 +57,5 @@ const getSearchSuggestions = async(query: string)=>{
   }
 }
 
-export { getSearchSuggestions, getVideoChapters, searchVideo, youtube, getPlaylist };
+export { getPlaylist, getSearchSuggestions, getVideoChapters, searchVideo };
 
