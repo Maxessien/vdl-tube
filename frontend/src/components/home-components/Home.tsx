@@ -7,12 +7,14 @@ import { FaCopy, FaExternalLinkAlt, FaYoutube } from "react-icons/fa";
 import { toast } from "react-toastify";
 import LoadRoller from "../reusable-components/LoadRoller";
 import Search from "./Search";
+import { UserHomeFeed } from "@/src/types/matesTypes";
 
 interface HomeProps {
   isSignedIn?: boolean;
+  feed: UserHomeFeed | null
 }
 
-const Home = ({ isSignedIn = false }: HomeProps) => {
+const Home = ({ isSignedIn = false, feed }: HomeProps) => {
   const [showLink, setShowLink] = useState({ show: false, link: "", code: "" });
   
   const { mutateAsync, isPending } = useMutation({

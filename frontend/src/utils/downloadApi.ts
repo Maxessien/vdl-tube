@@ -43,5 +43,7 @@ function parseTimeParam(value: string | null): number | null {
   return parsed;
 }
 
+const YT_COOKIE_NAME = "yt_secure_session"
 
-export {resolveFfmpegBinaryPath, parseTimeParam}
+
+export {resolveFfmpegBinaryPath, parseTimeParam, YT_COOKIE_NAME}

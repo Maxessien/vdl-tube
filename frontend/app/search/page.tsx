@@ -28,17 +28,18 @@ const SearchPage = async ({
   );
 
   // Serialize videos to plain objects for Client Component
-  const serializedVideos: SerializedVideoResult[] = videos?.map((video: any) => ({
-    video_id: video.video_id,
-    title: video.title.toString(),
-    view_count: video.view_count?.toString() || "0",
+  const serializedVideos: SerializedVideoResult[] = videos?.map((vids) => ({
+    video_id: vids.video_id,
+    title: vids.title.toString(),
+    view_count: vids.view_count?.toString() || "0",
     best_thumbnail: {
-      url: video.best_thumbnail?.url || "",
+      url: vids.best_thumbnail?.url || "",
     },
+    thumbnails: vids.thumbnails.sort((a, b)=> a.width - b.width),
     author: {
-      name: video.author?.name || "",
+      name: vids.author?.name || "",
       best_thumbnail: {
-        url: video.author?.best_thumbnail?.url || "",
+        url: vids.author?.best_thumbnail?.url || "",
       },
     },
   }));

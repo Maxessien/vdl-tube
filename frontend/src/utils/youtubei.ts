@@ -1,6 +1,6 @@
-"use server"
+"use server";
 
-import { Innertube, UniversalCache } from "youtubei.js";
+import { Innertube, OAuth2Tokens, UniversalCache, YTNodes } from "youtubei.js";
 import logger from "./logger";
 
 const youtube = await Innertube.create({
@@ -19,15 +19,15 @@ const searchVideo = async (query: string) => {
   }
 };
 
-const getPlaylist = async(id: string)=>{
+const getPlaylist = async (id: string) => {
   try {
-    const playlist = await youtube.getPlaylist(id)
-    return playlist
+    const playlist = await youtube.getPlaylist(id);
+    return playlist;
   } catch (err) {
     logger.error("Get playlst err", err);
-    return null
+    return null;
   }
-}
+};
 
 const getVideoChapters = async (videoId: string) => {
   try {
@@ -42,20 +42,60 @@ const getVideoChapters = async (videoId: string) => {
         }))
       : [];
   } catch (err) {
-    logger.error("Error getting video chapters", err)
+    logger.error("Error getting video chapters", err);
     return [];
   }
 };
 
-const getSearchSuggestions = async(query: string)=>{
+const getSearchSuggestions = async (query: string) => {
   try {
-    const suggestions = await youtube.getSearchSuggestions(query)
-    return suggestions
+    const suggestions = await youtube.getSearchSuggestions(query);
+    return suggestions;
   } catch (err) {
-    logger.error("Error getting search suggestions", err)
-    return []
+    logger.error("Error getting search suggestions", err);
+    return [];
   }
-}
+};
 
-export { getPlaylist, getSearchSuggestions, getVideoChapters, searchVideo };
+const getUserHomeFeed = async (yt: Innertube) => {
+  try {
+    const feed = await yt.getHomeFeed();
+    const vids = feed.videos
+      .filter(
+        (v) =>
+          v.is(YTNodes.Video) ||
+          v.is(YTNodes.CompactVideo) ||
+          v.is(YTNodes.GridVideo),
+      )
+      .map((v) => {
+        const {
+          author,
+          duration,
+          thumbnails,
+          title,
+          video_id,
+          rich_thumbnail,
+          short_view_count,
+        } = v;
+        return {
+          author,
+          duration,
+          thumbnails,
+          title: title.toString(),
+          video_id,
+          rich_thumbnail,
+          views: (v as YTNodes.Video)?.view_count.toString() || short_view_count.toString(),
+        };
+      });
+    const shorts = feed.videos
+      .filter((v) => v.is(YTNodes.ReelItem))
+      .map(({ thumbnails, title, views }) => ({ thumbnails, title: title.toString(), views: views.toString() }));
 
+    return {vids, shorts}
+  } catch (err) {
+    logger.error("Get home feed err", err);
+    return null;
+  }
+};
+
+export { getPlaylist, getSearchSuggestions, getVideoChapters, searchVideo, getUserHomeFeed };

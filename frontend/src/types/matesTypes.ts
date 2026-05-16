@@ -1,4 +1,5 @@
 import { YTNodes } from "youtubei.js";
+import { getUserHomeFeed } from "@/src/utils/youtubei";
 
 export interface AudioFormat {
   quality: number;
@@ -46,8 +47,8 @@ export interface DownloadUrlResult {
   data: { downloadUrl: string } | null;
 }
 
-export type SearchResultVideos = YTNodes.Video | YTNodes.CompactVideo
-export type SearchResultPlaylist = YTNodes.Playlist | YTNodes.GridPlaylist
+export type SearchResultVideos = YTNodes.Video | YTNodes.CompactVideo;
+export type SearchResultPlaylist = YTNodes.Playlist | YTNodes.GridPlaylist;
 
 // Serializable versions for Server to Client Component passing
 export interface SerializedVideoResult {
@@ -55,6 +56,7 @@ export interface SerializedVideoResult {
   title: string;
   view_count: string;
   best_thumbnail: { url: string };
+  thumbnails: { url: string }[];
   author: { name: string; best_thumbnail: { url: string } };
 }
 
@@ -64,3 +66,5 @@ export interface SerializedPlaylistResult {
   authorThumbnail?: string;
   thumbnails: Array<{ url: string; width?: number }>;
 }
+
+export type UserHomeFeed = Awaited<ReturnType<typeof getUserHomeFeed>>;

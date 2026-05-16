@@ -1,12 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
-"use client"
+"use client";
 
 import useSearch from "@/src/hooks/useSearch";
 import { SerializedVideoResult } from "@/src/types/matesTypes";
 import { FaArrowRight, FaEye } from "react-icons/fa";
 import LoadRoller from "../reusable-components/LoadRoller";
 
-const ResultCard = ({ result }: { result: SerializedVideoResult}) => {
+const ResultCard = ({ result }: { result: SerializedVideoResult }) => {
   const { search, isFetching } = useSearch();
 
   return (
@@ -17,19 +17,37 @@ const ResultCard = ({ result }: { result: SerializedVideoResult}) => {
       className="w-full cursor-pointer flex flex-col px-2 py-3 rounded-md hover:scale-[1.03] focus:scale-[1.03] transition-all ease-in shadow-[0px_0px_10px_-6px_var(--text-primary-light)]"
     >
       <div className="w-full aspect-video rounded-md mb-2 overflow-hidden">
-        <img className="object-center object-cover w-full h-full" src={result.best_thumbnail.url} alt={"Thumbnail"} />
+        <picture>
+          <source srcSet={result.best_thumbnail.url} />
+          {result.thumbnails.map(({ url }, idx) => (
+            <source key={idx} srcSet={url} />
+          ))}
+          <img
+            className="object-center object-cover w-full h-full"
+            src={result.best_thumbnail.url}
+            alt={"Thumbnail"}
+          />
+        </picture>
       </div>
       <div className="flex flex-1 justify-between items-start gap-2">
         <div className="space-y-2 h-full flex flex-col justify-between">
-          <p className="text-base font-medium text-(--text-primary)">{result.title.toString()}</p>
+          <p className="text-base font-medium text-(--text-primary)">
+            {result.title.toString()}
+          </p>
           <p className="text-sm flex gap-2 items-center text-(--text-primary-light) font-medium">
             Views: <FaEye /> {result.view_count.toString()}
           </p>
           <div className="w-full flex justify-start items-center gap-2">
             <div className="w-7 aspect-square rounded-full overflow-hidden">
-              <img className="w-full h-full object-cover object-center" src={result.author.best_thumbnail.url} alt="Profile" />
+              <img
+                className="w-full h-full object-cover object-center"
+                src={result.author.best_thumbnail.url}
+                alt="Profile"
+              />
             </div>
-            <p className="text-(--text-primary-light) flex-1 font-medium text-base">{result.author.name}</p>
+            <p className="text-(--text-primary-light) flex-1 font-medium text-base">
+              {result.author.name}
+            </p>
           </div>
         </div>
         <button
