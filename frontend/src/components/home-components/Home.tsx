@@ -19,7 +19,6 @@ const Home = ({ isSignedIn = false }: HomeProps) => {
     mutationFn: startDeviceFlow,
     onSuccess: ({ code, url }: { url: string; code: string }) => {
       setShowLink({ code, link: url, show: true });
-      console.log("Ran success")
     },
     onError: () => toast.error("Sign In failed"),
   });

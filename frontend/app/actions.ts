@@ -17,7 +17,7 @@ export async function startDeviceFlow() {
     youtube.session.on('auth', async ({ credentials }) => {
       // SECURELY save credentials in a client cookie that JS cannot touch
       const cookieStore = await cookies();
-      const token =  jwt.sign(JSON.stringify(credentials), process.env.JWT_SECRET, {expiresIn: 60 * 60 * 24})
+      const token =  jwt.sign(JSON.stringify(credentials), process.env.JWT_SECRET, {expiresIn: credentials.expires_in || 60 * 60 * 24})
       cookieStore.set('yt_secure_session', token, {
         httpOnly: true,  // Prevents XSS script theft
         secure: true,    // Forces HTTPS
@@ -29,7 +29,7 @@ export async function startDeviceFlow() {
     youtube.session.on('update-credentials', async ({ credentials }) => {
       // SECURELY refresh credentials in a client cookie that JS cannot touch
       const cookieStore = await cookies();
-      const token =  jwt.sign(JSON.stringify(credentials), process.env.JWT_SECRET, {expiresIn: 60 * 60 * 24})
+      const token =  jwt.sign(JSON.stringify(credentials), process.env.JWT_SECRET, {expiresIn: credentials.expires_in || 60 * 60 * 24})
       cookieStore.set('yt_secure_session', token, {
         httpOnly: true,  // Prevents XSS script theft
         secure: true,    // Forces HTTPS
