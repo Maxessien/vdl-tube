@@ -1,6 +1,6 @@
 "use server";
 
-import { Innertube, OAuth2Tokens, UniversalCache, YTNodes } from "youtubei.js";
+import { Innertube, UniversalCache, YTNodes } from "youtubei.js";
 import logger from "./logger";
 
 const youtube = await Innertube.create({

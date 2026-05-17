@@ -32,10 +32,10 @@ const ResultCard = ({ result }: { result: SerializedVideoResult }) => {
       <div className="flex flex-1 justify-between items-start gap-2">
         <div className="space-y-2 h-full flex flex-col justify-between">
           <p className="text-base font-medium text-(--text-primary)">
-            {result.title.toString()}
+            {result.title}
           </p>
           <p className="text-sm flex gap-2 items-center text-(--text-primary-light) font-medium">
-            Views: <FaEye /> {result.view_count.toString()}
+            Views: <FaEye /> {result.view_count}
           </p>
           <div className="w-full flex justify-start items-center gap-2">
             <div className="w-7 aspect-square rounded-full overflow-hidden">

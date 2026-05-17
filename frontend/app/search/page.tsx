@@ -35,7 +35,7 @@ const SearchPage = async ({
     best_thumbnail: {
       url: vids.best_thumbnail?.url || "",
     },
-    thumbnails: vids.thumbnails.sort((a, b)=> a.width - b.width),
+    thumbnails: vids.thumbnails.sort((a, b)=> a.width - b.width).map(({url})=>({url})),
     author: {
       name: vids.author?.name || "",
       best_thumbnail: {
@@ -61,7 +61,7 @@ const SearchPage = async ({
         id: playlist.id,
         author: authorName,
         authorThumbnail,
-        thumbnails: playlist.thumbnails || [],
+        thumbnails: playlist.thumbnails.map(({url, width})=>({url, width})) || [],
       };
     }
   );
