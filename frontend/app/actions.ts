@@ -21,7 +21,6 @@ export const startDeviceFlow = async () => {
       const token = jwt.sign(
         JSON.stringify(credentials),
         process.env.JWT_SECRET,
-        { expiresIn: credentials.expires_in || 60 * 60 * 24 },
       );
       cookieStore.set(YT_COOKIE_NAME, token, {
         httpOnly: true, // Prevents XSS script theft
@@ -37,7 +36,6 @@ export const startDeviceFlow = async () => {
       const token = jwt.sign(
         JSON.stringify(credentials),
         process.env.JWT_SECRET,
-        { expiresIn: credentials.expires_in || 60 * 60 * 24 },
       );
       cookieStore.set(YT_COOKIE_NAME, token, {
         httpOnly: true, // Prevents XSS script theft

@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { MouseEvent, RefObject } from "react";
+import { MouseEvent, RefObject, useRef } from "react";
 import LoadRoller from "../reusable-components/LoadRoller";
 import { VideoState } from "./VideoPlayer";
 
@@ -30,14 +30,14 @@ const VideoClickRegister = ({
   isPaused: boolean;
   videoState: VideoState;
 }) => {
-  const clickTimeOut: NodeJS.Timeout[] = [];
+  const clickTimeOut = useRef<NodeJS.Timeout[]>([]);
   const seekeDoubleClick = (
     amount: number,
     e: MouseEvent<HTMLDivElement>,
     direction: "forward" | "backward",
   ) => {
     e.stopPropagation();
-    clickTimeOut.forEach((timeOut) => clearTimeout(timeOut));
+    clickTimeOut.current.forEach((timeOut) => clearTimeout(timeOut));
     seekFn(amount, direction);
   };
 
@@ -45,7 +45,7 @@ const VideoClickRegister = ({
     <div
       onClick={() => {
         const timeOut = setTimeout(showControlsFn, 300);
-        clickTimeOut.push(timeOut);
+        clickTimeOut.current.push(timeOut);
       }}
       className="w-full h-full grid grid-cols-3"
     >
@@ -62,13 +62,13 @@ const VideoClickRegister = ({
       <div
         onDoubleClick={(e) => {
           e.stopPropagation();
-          clickTimeOut.forEach((timeOut) => clearTimeout(timeOut));
+          clickTimeOut.current.forEach((timeOut) => clearTimeout(timeOut));
           isPaused ? vidRef?.current?.play() : vidRef?.current?.pause();
         }}
         className="w-full h-full flex items-center justify-center"
       >
         {videoState.loading && <div className="bg-[rgb(0,0,0,0.6)] w-20 h-20 rounded-full p-3">
-            <LoadRoller strokeWidth={10} className="text-(--text-primary)" />
+            <LoadRoller strokeWidth={10} />
           </div>}
       </div>
       <div

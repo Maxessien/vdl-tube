@@ -17,7 +17,7 @@ const useSearch = () => {
     try {
       setIsFetching(true);
       if (search.trim().length <= 0) {
-        return undefined;
+        return;
       }
 
       const youtubeUrlRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/i;

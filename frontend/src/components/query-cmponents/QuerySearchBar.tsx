@@ -7,10 +7,12 @@ import { useRouter } from "nextjs-toploader/app";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import LoadRoller from "../reusable-components/LoadRoller";
+import useSearch from './../../hooks/useSearch';
 
 const QuerySearchBar = () => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const {isFetching, search} = useSearch()
 
   const handleChange = (e: ChangeEvent<HTMLInputElement, HTMLInputElement>) => {
     setQuery(e.target.value);
@@ -42,7 +44,7 @@ const QuerySearchBar = () => {
         onSubmit={(e) => {
           e.preventDefault();
           if (!(query.trim().length > 0)) return;
-          router.push(`/search?query=${query}`);
+          search(query);
         }}
         className="w-full relative"
       >
@@ -50,14 +52,14 @@ const QuerySearchBar = () => {
           className="w-full text-base md:text-lg font-medium text-(--text-primary) p-2 pl-8 outline-none border-b-2 border-b-(--main-secondary-light) focus:border-b-gray-400"
           onChange={(e) => handleChange(e)}
           type="text"
-          placeholder="Search video..."
+          placeholder="Search video or paste video url"
           autoFocus={true}
         />
         <button
           className="absolute text-(--text-primary) z-99 top-1/2 left-2 -translate-y-1/2 font-medium text-lg"
           type="submit"
         >
-          <FaSearch />
+          {isFetching ? <LoadRoller size={18} strokeWidth={14} /> : <FaSearch />}
         </button>
         <motion.div
           initial={{ width: "100%" }}
