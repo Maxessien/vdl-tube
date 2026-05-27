@@ -29,10 +29,12 @@ const VideoPlayer = ({
   urls,
   posterUrl,
   title,
+  defaultStartTime,
 }: {
   urls: UrlInfo[];
   posterUrl: string;
   title: string;
+  defaultStartTime?: number;
 }) => {
   const [showControls, setShowControls] = useState(true);
   const [videoState, setVideoState] = useState<VideoState>({
@@ -43,7 +45,7 @@ const VideoPlayer = ({
     seeked: { direction: "forward", active: false },
     expanded: false,
     muted: false,
-    startTime: 0,
+    startTime: defaultStartTime || 0,
     selectedQuality: urls?.[0]?.id ?? "",
     showSettings: false,
   });
@@ -93,7 +95,7 @@ const VideoPlayer = ({
     )?.url;
     if (newUrl?.trim()) {
       videoRef.current.src = newUrl;
-      videoRef.current.load()
+      videoRef.current.load();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoState.selectedQuality]);

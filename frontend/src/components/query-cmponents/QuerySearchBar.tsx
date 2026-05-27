@@ -52,7 +52,7 @@ const QuerySearchBar = () => {
         className="w-full relative"
       >
         <input
-          className="w-full text-base md:text-lg font-medium text-(--text-primary) p-2 pl-8 outline-none border-b-2 border-b-(--main-secondary-light) focus:border-b-gray-400"
+          className="w-full text-base md:text-lg font-medium text-(--text-primary) p-2 pl-10 outline-none border-b-2 border-b-(--main-secondary-light) focus:border-b-gray-400"
           onChange={(e) => handleChange(e)}
           type="text"
           placeholder="Search video or paste video url"
@@ -62,7 +62,7 @@ const QuerySearchBar = () => {
           className="absolute text-(--text-primary) z-99 top-1/2 left-2 -translate-y-1/2 font-medium text-lg"
           type="submit"
         >
-          {isFetching ? <FaSpinner className="text-3xl animate-spin" /> : <FaSearch />}
+          {isFetching ? <FaSpinner className="text-2xl animate-spin" /> : <FaSearch />}
         </button>
         <motion.div
           initial={{ width: "100%" }}

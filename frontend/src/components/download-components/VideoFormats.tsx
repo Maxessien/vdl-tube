@@ -2,11 +2,13 @@
 
 import { RootState } from "@/src/store";
 import type { AudioFormat, VideoFormat } from "@/src/types/matesTypes";
+import { IFRAME_EMBED_URL } from "@/src/utils/downloader";
 import { resolveDownloadUrl } from "@/src/utils/mate";
 import { motion } from "framer-motion";
 import { notFound } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaArrowRight, FaSpinner } from "react-icons/fa";
+import ReactPlayer from "react-player";
 import { useSelector } from "react-redux";
 import { v4 } from "uuid";
 import VideoPlayer from "../video-player/VideoPlayer";
@@ -50,6 +52,12 @@ const VideoFormats = ({ id }: { id: string }) => {
   const [vidUrls, setVidUrls] = useState<UrlInfo[]>([]);
   const info = infos?.[id];
   const [formatView, setFormatView] = useState<"audio" | "video">("video");
+  const [iframeState, setIframeState] = useState({
+    working: true,
+    currentTime: 0,
+  });
+
+  const iframeCountdownRef = useRef<NodeJS.Timeout>(null);
 
   const [qualityInfo, setQualityInfo] = useState<{
     isOpen: boolean;
@@ -78,11 +86,15 @@ const VideoFormats = ({ id }: { id: string }) => {
   useEffect(() => {
     let isMounted = true;
     (async () => {
+      if (iframeState.working) return;
       if (!info) return;
+
       const formats = [...info.video_formats];
       for (const format of formats?.reverse()) {
         if (!isMounted) break;
+
         const formatUrl = await getVidUrl(format.quality.toString());
+
         if (formatUrl) {
           setVidUrls((state) => [
             ...state,
@@ -100,18 +112,51 @@ const VideoFormats = ({ id }: { id: string }) => {
       isMounted = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [iframeState.working]);
+
+  useEffect(() => {
+    iframeCountdownRef.current = setTimeout(() => {
+      setIframeState((state) => ({ ...state, working: false }));
+    }, 7000);
+
+    return () => clearTimeout(iframeCountdownRef.current);
+  }, [info.id, setIframeState]); 
 
   if (!info) return notFound();
 
   return (
     <section className="md:grid md:grid-cols-[70%_30%] gap-3 md:justify-between mx-auto">
-      <div className="md:h-full max-h-screen md:px-3 md:py-4 w-full md:w-auto max-w-full pb-5 aspect-video">
-        {vidUrls?.length > 0 ? (
+      <div className="md:h-full max-h-screen md:px-3 md:py-4 w-full md:w-auto max-w-full pb-5 overflow-hidden aspect-video">
+        {iframeState.working ? (
+          <ReactPlayer
+            className="w-full h-full object-contain object-center"
+            src={`${IFRAME_EMBED_URL}/${info.id}`}
+            onError={() =>
+              setIframeState((state) => ({ ...state, working: false }))
+            }
+            onWaiting={() => {
+              clearTimeout(iframeCountdownRef.current);
+              iframeCountdownRef.current = setTimeout(() => {
+                setIframeState((state) => ({ ...state, working: false }));
+              }, 6000);
+            }}
+            onReady={() => {
+              clearTimeout(iframeCountdownRef.current);
+              setIframeState((state) => ({ ...state, working: true }));
+            }}
+            onTimeUpdate={(e) => {
+              setIframeState((state) => ({
+                ...state,
+                currentTime: e.currentTarget.currentTime,
+              }));
+            }}
+          />
+        ) : vidUrls?.length > 0 ? (
           <VideoPlayer
             posterUrl={info?.thumbnail ?? info?.thumbnail_formats?.[0].url}
             title={info?.title}
             urls={vidUrls}
+            defaultStartTime={iframeState.currentTime}
           />
         ) : (
           <div className="max-w-4xl w-full relative aspect-video">

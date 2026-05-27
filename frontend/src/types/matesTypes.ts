@@ -58,7 +58,7 @@ export interface SerializedVideoResult {
   best_thumbnail: { url: string };
   thumbnails: { url: string }[];
   author: { name: string; best_thumbnail: { url: string } };
-  duration: {text: string | undefined, seconds: number}
+  duration: { text: string | undefined; seconds: number };
 }
 
 export interface SerializedPlaylistResult {
@@ -68,4 +68,29 @@ export interface SerializedPlaylistResult {
   thumbnails: Array<{ url: string; width?: number }>;
 }
 
+export interface Thumbnails {
+  url: string;
+  width: number;
+  height: number;
+}
+
 export type UserHomeFeed = Awaited<ReturnType<typeof getUserHomeFeed>>;
+
+export interface PlaylistInfo {
+  subtitle: string | null;
+  author: { thumbnails: Thumbnails[]; name: string };
+  thumbnails: Thumbnails[];
+  total_items: string;
+  views: string;
+  last_updated: string;
+  title?: string | undefined;
+  description?: string | undefined;
+  type?: string | undefined;
+}
+
+export interface PlaylistVideo {
+  videoId: string;
+  thumbnails: Thumbnails[];
+  duration: { text: string | undefined; seconds: number };
+  title: string
+}

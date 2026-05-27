@@ -33,7 +33,7 @@ const ResultCard = ({ result }: { result: SerializedVideoResult }) => {
             {result.duration.text ||
               secondsToTimestamp(
                 result.duration.seconds,
-                result.duration.seconds > 3599,
+                result.duration.seconds < 3599,
               )}
           </span>
         </p>

@@ -10,7 +10,7 @@ interface DownloadPageProps {
   searchParams: Promise<{id: string}>
 }
 
-const DownloadPage = async ({ params }: DownloadPageProps) => {
+const DownloadPage = async ({ params, searchParams }: DownloadPageProps) => {
   const par = await params
   
   return <VideoFormats id={par.id} />

@@ -7,6 +7,8 @@ const youtube = await Innertube.create({
   cache: new UniversalCache(true, "/tmp/ytjs-cache"),
 });
 
+(await youtube.getPlaylist("")).videos
+
 const searchVideo = async (query: string) => {
   try {
     if (!query?.toString()?.trim()) throw new Error("Invalid query");
