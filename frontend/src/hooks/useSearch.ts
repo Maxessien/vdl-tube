@@ -6,8 +6,9 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { v4 } from "uuid";
 import { addInfo } from "../store-slices/infoMappingsSlice";
+import { extractPlaylistId, isYouTubePlaylist } from "../utils/downloader";
 import logger from "../utils/logger";
-import { getVideoInfo, resolveDownloadUrl } from "../utils/mate";
+import { getVideoInfo } from "../utils/mate";
 
 export const youtubeUrlRegex =
   /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/i;
@@ -21,6 +22,13 @@ const useSearch = () => {
       setIsFetching(true);
       if (search.trim().length <= 0) {
         return;
+      }
+
+      const isPlaylist = isYouTubePlaylist(search)
+
+      if (isPlaylist) {
+        router.push(`/playlist/${extractPlaylistId(search)}`)
+        return
       }
 
       const isUrl = youtubeUrlRegex.test(search);

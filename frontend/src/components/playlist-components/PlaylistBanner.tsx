@@ -17,11 +17,11 @@ const PlaylistBanner = ({ info }: { info: PlaylistInfo }) => {
     <div className="relative overflow-hidden rounded-3xl p-6 bg-linear-to-b from-(--main-primary) to-(--main-secondary-light) flex flex-col h-full shadow-xl border border-(--main-secondary-light)">
       {/* Immersive blurred background effect */}
       <div 
-        className="absolute inset-0 bg-cover bg-center opacity-10 blur-2xl scale-125 pointer-events-none"
+        className="absolute inset-0 bg-cover bg-center w-full opacity-10 blur-2xl scale-125 pointer-events-none"
         style={{ backgroundImage: `url(${mainThumbnail})` }}
       />
 
-      <div className="relative z-10 flex flex-col h-full">
+      <div className="relative z-10 flex flex-col h-max">
         {/* Main Playlist Banner Artwork */}
         <div className="w-full aspect-video rounded-xl overflow-hidden shadow-lg group relative mb-5 border border-white/10">
           <picture>
@@ -73,8 +73,8 @@ const PlaylistBanner = ({ info }: { info: PlaylistInfo }) => {
         </div>
 
         {/* Expandable Scrollable Description Container */}
-        {description && (
-          <section className="mt-auto bg-black/20 rounded-xl p-3.5 border border-white/5 max-h-40 overflow-y-auto custom-scrollbar">
+        {/* {description && (
+          <section className="mt-auto overflow-y-auto flex-1">
             <h2 className="text-xs uppercase tracking-wider font-bold text-(--text-primary-light) mb-1">
               Description
             </h2>
@@ -82,7 +82,7 @@ const PlaylistBanner = ({ info }: { info: PlaylistInfo }) => {
               {description}
             </p>
           </section>
-        )}
+        )} */}
       </div>
     </div>
   );

@@ -25,7 +25,7 @@ const PlaylistPage = async ({
 
   const info: PlaylistInfo = {
     last_updated,
-    subtitle: subtitle.toString(),
+    subtitle: subtitle?.toString(),
     thumbnails: thumbnails.map(({ height, url, width }) => ({
       height,
       url,
@@ -43,13 +43,19 @@ const PlaylistPage = async ({
   };
 
   const videos: PlaylistVideo[] = playlist.videos
-    .filter((v) => v.is(YTNodes.CompactVideo))
-    .map(({ thumbnails, title, duration, video_id }) => ({
+    .filter((v) => v.is(YTNodes.CompactVideo) || v.is(YTNodes.Video) || v.is(YTNodes.PlaylistVideo))
+    .map((v) => {
+      const { thumbnails, title, duration } = v
+      const id = v.is(YTNodes.PlaylistVideo) ? v.id : v.video_id
+      return {
       duration,
       thumbnails: thumbnails.map((th) => ({ ...th })),
       title: title.toString(),
-      videoId: video_id,
-    }));
+      videoId: id,
+    }
+    });
+
+  console.log(playlist.videos)
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 max-w-400 mx-auto p-4 lg:p-6 text-(--text-primary) min-h-screen">

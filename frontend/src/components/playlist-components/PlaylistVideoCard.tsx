@@ -47,9 +47,9 @@ const PlaylistVideoCard = ({ videoInfo }: { videoInfo: PlaylistVideo }) => {
             title="Download video"
           >
             {isFetching ? (
-              <FaSpinner className="animate-spin text-sm" />
+              <FaSpinner className="animate-spin text-sm sm:text-base lg:text-xl" />
             ) : (
-              <FaDownload className="text-sm" />
+              <FaDownload className="text-sm sm:text-base lg:text-xl" />
             )}
           </button>
         </div>
