@@ -34,6 +34,7 @@
     "react-icons": "^5.5.0",
     "react-redux": "^9.2.0",
     "react-toastify": "^11.0.5",
+    "tsx": "^4.22.3",
     "uuid": "^13.0.0",
     "youtubei.js": "^16.0.1"
   },

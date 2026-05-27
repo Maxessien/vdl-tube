@@ -5,9 +5,8 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import { useRouter } from "nextjs-toploader/app";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
-import { FaSearch } from "react-icons/fa";
-import LoadRoller from "../reusable-components/LoadRoller";
-import useSearch from './../../hooks/useSearch';
+import { FaSearch, FaSpinner } from "react-icons/fa";
+import useSearch, { youtubeUrlRegex } from './../../hooks/useSearch';
 
 const QuerySearchBar = () => {
   const [query, setQuery] = useState("");
@@ -22,6 +21,10 @@ const QuerySearchBar = () => {
 
   const getSuggestions = async () => {
     if (!(query.trim().length > 0)) return;
+    if (youtubeUrlRegex.test(query)) {
+      search(query)
+      return
+    }
     const s = await axios.get<string[]>("/api/suggestions", {
       params: { query },
     });
@@ -59,7 +62,7 @@ const QuerySearchBar = () => {
           className="absolute text-(--text-primary) z-99 top-1/2 left-2 -translate-y-1/2 font-medium text-lg"
           type="submit"
         >
-          {isFetching ? <LoadRoller size={18} strokeWidth={14} /> : <FaSearch />}
+          {isFetching ? <FaSpinner className="text-3xl animate-spin" /> : <FaSearch />}
         </button>
         <motion.div
           initial={{ width: "100%" }}
@@ -72,7 +75,7 @@ const QuerySearchBar = () => {
       <ul className="w-full px-1 sm:px-3 gap-2 items-start flex flex-col">
         {isPending ? (
           <div className="w-full flex text-(--text-primary) justify-center items-center mt-2">
-            <div className="w-18 aspect-square"><LoadRoller strokeWidth={8} /></div>
+            <FaSpinner className="text-3xl animate-spin" />
           </div>
         ) : suggestions.length > 0 ? (
           suggestions.map((s, idx) => (

@@ -1,6 +1,6 @@
-import LoadRoller from "@/src/components/reusable-components/LoadRoller";
 import { secondsToTimestamp, timestampToSeconds } from "@/src/utils/downloader";
 import { useForm } from "react-hook-form";
+import { FaSpinner } from "react-icons/fa";
 
 const RangeDownload = ({ duration, submitFn, isPending, isActive }: { duration: number, isActive: boolean, isPending: boolean, submitFn: (start: number, end: number)=>void }) => {
   const {
@@ -98,7 +98,7 @@ const RangeDownload = ({ duration, submitFn, isPending, isActive }: { duration: 
           {isActive ? (
             <>
               <span className="sr-only">Downloading range</span>
-              <LoadRoller size={24} duration={0.7} />
+              <FaSpinner className="text-3xl animate-spin" />
             </>
           ) : (
             "Download Range"

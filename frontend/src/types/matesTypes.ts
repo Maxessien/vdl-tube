@@ -1,5 +1,5 @@
-import { YTNodes } from "youtubei.js";
 import { getUserHomeFeed } from "@/src/utils/youtubei";
+import { YTNodes } from "youtubei.js";
 
 export interface AudioFormat {
   quality: number;
@@ -58,6 +58,7 @@ export interface SerializedVideoResult {
   best_thumbnail: { url: string };
   thumbnails: { url: string }[];
   author: { name: string; best_thumbnail: { url: string } };
+  duration: {text: string | undefined, seconds: number}
 }
 
 export interface SerializedPlaylistResult {

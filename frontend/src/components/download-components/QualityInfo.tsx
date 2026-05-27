@@ -1,4 +1,3 @@
-import LoadRoller from "@/src/components/reusable-components/LoadRoller";
 import type { VideoInfo } from "@/src/types/matesTypes";
 import { downloadFile, getYouTubeID } from "@/src/utils/downloader";
 import logger from "@/src/utils/logger";
@@ -6,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { Chapter } from "get-youtube-chapters";
 import { useEffect, useState } from "react";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
 import Chapters from "./Chapters";
 import RangeDownload from "./RangeDownload";
@@ -108,7 +107,7 @@ const QualityInfo = ({ info, closeInfoFn, quality, formatType }: QualityInfo) =>
           {downloading.isActive && downloading.type === "full" ? (
             <>
               <span className="sr-only">Downloading full{" "}{(formatType === "audio" ? "Audio" : "Video")}</span>
-              <LoadRoller size={24} duration={0.7} />
+              <FaSpinner className="text-3xl animate-spin" />
             </>
           ) : (
             "Download Full " + (formatType === "audio" ? "Audio" : "Video")

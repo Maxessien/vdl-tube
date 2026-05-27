@@ -1,13 +1,12 @@
 "use client";
 
 import { startDeviceFlow } from "@/app/actions";
+import { UserHomeFeed } from "@/src/types/matesTypes";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { FaCopy, FaExternalLinkAlt, FaYoutube } from "react-icons/fa";
+import { FaCopy, FaExternalLinkAlt, FaSpinner, FaYoutube } from "react-icons/fa";
 import { toast } from "react-toastify";
-import LoadRoller from "../reusable-components/LoadRoller";
 import Search from "./Search";
-import { UserHomeFeed } from "@/src/types/matesTypes";
 
 interface HomeProps {
   isSignedIn?: boolean;
@@ -49,7 +48,7 @@ const Home = ({ isSignedIn = false, feed }: HomeProps) => {
             className="flex min-w-60 items-center justify-center gap-2 rounded-md bg-(--main-primary) px-3 sm:px-6 lg:px-8 py-2 text-lg font-medium tracking-wide text-(--text-primary) shadow-md transition-all duration-300 hover:-translate-y-1 hover:bg-(--main-primary-light) hover:shadow-lg hover:shadow-(--main-primary)/50 active:translate-y-0 active:scale-95 disabled:pointer-events-none disabled:opacity-80 disabled:scale-100"
           >
             {isPending ? (
-              <div className="w-10"><LoadRoller /></div>
+              <FaSpinner className="text-3xl animate-spin" />
             ) : (
               <>
                 <FaYoutube className="text-2xl" />

@@ -3,8 +3,8 @@
 
 import useSearch from "@/src/hooks/useSearch";
 import { SerializedVideoResult } from "@/src/types/matesTypes";
-import { FaArrowRight, FaEye } from "react-icons/fa";
-import LoadRoller from "../reusable-components/LoadRoller";
+import { secondsToTimestamp } from "@/src/utils/downloader";
+import { FaArrowRight, FaEye, FaSpinner } from "react-icons/fa";
 
 const ResultCard = ({ result }: { result: SerializedVideoResult }) => {
   const { search, isFetching } = useSearch();
@@ -16,7 +16,7 @@ const ResultCard = ({ result }: { result: SerializedVideoResult }) => {
       }
       className="w-full cursor-pointer flex flex-col px-2 py-3 rounded-md hover:scale-[1.03] focus:scale-[1.03] transition-all ease-in shadow-[0px_0px_10px_-6px_var(--text-primary-light)]"
     >
-      <div className="w-full aspect-video rounded-md mb-2 overflow-hidden">
+      <div className="w-full relative aspect-video rounded-md mb-2 overflow-hidden">
         <picture>
           <source srcSet={result.best_thumbnail.url} />
           {result.thumbnails.map(({ url }, idx) => (
@@ -28,6 +28,15 @@ const ResultCard = ({ result }: { result: SerializedVideoResult }) => {
             alt={"Thumbnail"}
           />
         </picture>
+        <p className="absolute p-1 flex justify-end text-(--text-primary) text-sm font-medium bottom-0 right-0">
+          <span className="bg-(--main-secondary) rounded-md px-2 py-1">
+            {result.duration.text ||
+              secondsToTimestamp(
+                result.duration.seconds,
+                result.duration.seconds > 3599,
+              )}
+          </span>
+        </p>
       </div>
       <div className="flex flex-1 justify-between items-start gap-2">
         <div className="space-y-2 h-full flex flex-col justify-between">
@@ -57,7 +66,7 @@ const ResultCard = ({ result }: { result: SerializedVideoResult }) => {
           }
         >
           {isFetching ? (
-            <LoadRoller size={18} strokeWidth={14} />
+            <FaSpinner className="text-3xl animate-spin" />
           ) : (
             <FaArrowRight />
           )}

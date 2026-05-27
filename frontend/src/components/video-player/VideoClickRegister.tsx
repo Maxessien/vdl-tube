@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { MouseEvent, RefObject, useRef } from "react";
-import LoadRoller from "../reusable-components/LoadRoller";
+import { FaSpinner } from "react-icons/fa";
 import { VideoState } from "./VideoPlayer";
 
 const SeekOverlay = ({ amount }: { amount: string }) => {
@@ -67,8 +67,8 @@ const VideoClickRegister = ({
         }}
         className="w-full h-full flex items-center justify-center"
       >
-        {videoState.loading && <div className="bg-[rgb(0,0,0,0.6)] w-20 h-20 rounded-full p-3">
-            <LoadRoller strokeWidth={10} />
+        {videoState.loading && <div className="bg-[rgb(0,0,0,0.6)] text-(--text-primary) rounded-full p-3">
+            <FaSpinner className="text-6xl animate-spin" />
           </div>}
       </div>
       <div

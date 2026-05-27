@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useRouter } from "nextjs-toploader/app";
 import { useState } from "react";
@@ -8,6 +8,9 @@ import { v4 } from "uuid";
 import { addInfo } from "../store-slices/infoMappingsSlice";
 import logger from "../utils/logger";
 import { getVideoInfo, resolveDownloadUrl } from "../utils/mate";
+
+export const youtubeUrlRegex =
+  /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/i;
 
 const useSearch = () => {
   const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -20,13 +23,15 @@ const useSearch = () => {
         return;
       }
 
-      const youtubeUrlRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/i;
       const isUrl = youtubeUrlRegex.test(search);
+
       if (isUrl) {
         const urlId = v4();
         const info = await getVideoInfo(search);
+        
         dispatch(addInfo({ key: urlId, info: info }));
         router.push(`/download/${urlId}?id=${info.id}`);
+
       } else router.push(`/search?query=${search}`);
     } catch (err) {
       logger.error("Error searching", err);
@@ -37,7 +42,7 @@ const useSearch = () => {
     }
   };
 
-  return {isFetching, search}
+  return { isFetching, search };
 };
 
-export default useSearch
+export default useSearch;

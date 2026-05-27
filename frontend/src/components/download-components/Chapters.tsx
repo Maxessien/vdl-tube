@@ -1,6 +1,6 @@
-import LoadRoller from "@/src/components/reusable-components/LoadRoller";
 import { secondsToTimestamp } from "@/src/utils/downloader";
 import { Chapter } from "get-youtube-chapters";
+import { FaSpinner } from "react-icons/fa";
 
 // export interface Chapter {
 //   title: string;
@@ -70,7 +70,7 @@ const Chapters = ({
                     {isActive(`chapter-${index}`) ? (
                       <>
                         <span className="sr-only">Downloading chapter</span>
-                        <LoadRoller size={20} duration={0.7} />
+                        <FaSpinner className="text-3xl animate-spin" />
                       </>
                     ) : (
                       "Download"
@@ -88,7 +88,7 @@ const Chapters = ({
       ) : (
         <div className="w-full py-6 flex justify-center text-(--text-primary) items-center">
           <span className="sr-only">Loading chapters</span>
-          <LoadRoller size={30} duration={0.7} />
+          <FaSpinner className="text-3xl animate-spin" />
         </div>
       )}
     </section>

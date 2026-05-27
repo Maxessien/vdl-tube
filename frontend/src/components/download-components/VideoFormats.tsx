@@ -6,10 +6,9 @@ import { resolveDownloadUrl } from "@/src/utils/mate";
 import { motion } from "framer-motion";
 import { notFound } from "next/navigation";
 import { useEffect, useState } from "react";
-import { FaArrowRight } from "react-icons/fa";
+import { FaArrowRight, FaSpinner } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { v4 } from "uuid";
-import LoadRoller from "../reusable-components/LoadRoller";
 import VideoPlayer from "../video-player/VideoPlayer";
 import QualityInfo from "./QualityInfo";
 
@@ -117,8 +116,8 @@ const VideoFormats = ({ id }: { id: string }) => {
         ) : (
           <div className="max-w-4xl w-full relative aspect-video">
             <div className="absolute z-5 w-full flex items-center justify-center h-full top-0 left-0 bg-[rgb(0,0,0,0.4)]">
-              <div className="bg-[rgb(0,0,0,0.8)] w-13 h-13 sm:w-20 sm:h-20 rounded-full p-3">
-                <LoadRoller strokeWidth={7} className="text-(--text-primary)" />
+              <div className="bg-[rgb(0,0,0,0.8)] rounded-full p-2 sm:p-3">
+                <FaSpinner className="text-3xl sm:text-6xl text-(--text-primary) animate-spin" />
               </div>
             </div>
             {/* eslint-disable-next-line @next/next/no-img-element */}

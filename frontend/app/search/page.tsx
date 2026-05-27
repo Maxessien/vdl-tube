@@ -27,6 +27,8 @@ const SearchPage = async ({
     (p) => p.is(YTNodes.Playlist) || p.is(YTNodes.GridPlaylist),
   );
 
+  console.log(videos[0])
+
   // Serialize videos to plain objects for Client Component
   const serializedVideos: SerializedVideoResult[] = videos?.map((vids) => ({
     video_id: vids.video_id,
@@ -42,6 +44,7 @@ const SearchPage = async ({
         url: vids.author?.best_thumbnail?.url || "",
       },
     },
+    duration: vids.duration
   }));
 
   // Serialize playlists to plain objects for Client Component
