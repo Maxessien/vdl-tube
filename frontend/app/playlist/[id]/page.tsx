@@ -52,9 +52,14 @@ const PlaylistPage = async ({
     }));
 
   return (
-    <div>
-      <PlaylistBanner info={info} />
-      <div>
+    <div className="flex flex-col lg:flex-row gap-6 max-w-400 mx-auto p-4 lg:p-6 text-(--text-primary) min-h-screen">
+      {/* Left Column: Fixed Banner Panel */}
+      <div className="w-full lg:w-90 xl:w-100 lg:shrink-0 lg:sticky lg:top-6 lg:h-[calc(100vh-48px)]">
+        <PlaylistBanner info={info} />
+      </div>
+
+      {/* Right Column: Scrollable Playlist Items */}
+      <div className="flex-1 flex flex-col gap-1.5 w-full">
         {videos.map((v) => (
           <PlaylistVideoCard videoInfo={v} key={v.videoId} />
         ))}

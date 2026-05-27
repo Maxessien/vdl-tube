@@ -70,7 +70,7 @@ export const secondsToTimestamp = (
   return timeArr.map((part) => part.toString().padStart(2, "0")).join(":");
 };
 
-export const IFRAME_EMBED_URL = "https://inv.nadeko.net/embed"
+export const IFRAME_EMBED_URL = "https://invidious.tiekoetter.com/embed"
 
 export const checkIframeUrl = async(url: string)=> {
   try {

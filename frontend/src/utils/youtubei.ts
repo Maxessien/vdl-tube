@@ -7,8 +7,6 @@ const youtube = await Innertube.create({
   cache: new UniversalCache(true, "/tmp/ytjs-cache"),
 });
 
-(await youtube.getPlaylist("")).videos
-
 const searchVideo = async (query: string) => {
   try {
     if (!query?.toString()?.trim()) throw new Error("Invalid query");
@@ -100,4 +98,5 @@ const getUserHomeFeed = async (yt: Innertube) => {
   }
 };
 
-export { getPlaylist, getSearchSuggestions, getVideoChapters, searchVideo, getUserHomeFeed };
+export { getPlaylist, getSearchSuggestions, getUserHomeFeed, getVideoChapters, searchVideo };
+

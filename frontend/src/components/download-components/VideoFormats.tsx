@@ -8,7 +8,6 @@ import { motion } from "framer-motion";
 import { notFound } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { FaArrowRight, FaSpinner } from "react-icons/fa";
-import ReactPlayer from "react-player";
 import { useSelector } from "react-redux";
 import { v4 } from "uuid";
 import VideoPlayer from "../video-player/VideoPlayer";
@@ -55,6 +54,7 @@ const VideoFormats = ({ id }: { id: string }) => {
   const [iframeState, setIframeState] = useState({
     working: true,
     currentTime: 0,
+    loaded: false
   });
 
   const iframeCountdownRef = useRef<NodeJS.Timeout>(null);
@@ -86,6 +86,7 @@ const VideoFormats = ({ id }: { id: string }) => {
   useEffect(() => {
     let isMounted = true;
     (async () => {
+      console.log(iframeState);
       if (iframeState.working) return;
       if (!info) return;
 
@@ -114,41 +115,41 @@ const VideoFormats = ({ id }: { id: string }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [iframeState.working]);
 
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
   useEffect(() => {
-    iframeCountdownRef.current = setTimeout(() => {
-      setIframeState((state) => ({ ...state, working: false }));
-    }, 7000);
+    if (!iframeRef.current) {
+      iframeCountdownRef.current = setTimeout(() => {
+        setIframeState((state) => ({ ...state, working: false }));
+      }, 15000);
+    }
 
     return () => clearTimeout(iframeCountdownRef.current);
-  }, [info.id, setIframeState]); 
+  }, [info.id, setIframeState]);
 
   if (!info) return notFound();
 
   return (
     <section className="md:grid md:grid-cols-[70%_30%] gap-3 md:justify-between mx-auto">
-      <div className="md:h-full max-h-screen md:px-3 md:py-4 w-full md:w-auto max-w-full pb-5 overflow-hidden aspect-video">
+      <div style={iframeState.loaded ? {border: "none"} : undefined} className="md:h-full border-2 border-(--main-primary) max-h-screen w-full md:w-auto max-w-full overflow-hidden aspect-video">
         {iframeState.working ? (
-          <ReactPlayer
+          <iframe
+            ref={iframeRef}
             className="w-full h-full object-contain object-center"
             src={`${IFRAME_EMBED_URL}/${info.id}`}
-            onError={() =>
-              setIframeState((state) => ({ ...state, working: false }))
-            }
-            onWaiting={() => {
+            allowFullScreen
+            // onError={() => {
+            //   setIframeState((state) => ({ ...state, working: false }));
+            // }}
+            // onWaiting={() => {
+            //   clearTimeout(iframeCountdownRef.current);
+            //   iframeCountdownRef.current = setTimeout(() => {
+            //     setIframeState((state) => ({ ...state, working: false }));
+            //   }, 10000);
+            // }}
+            onLoad={() => {
               clearTimeout(iframeCountdownRef.current);
-              iframeCountdownRef.current = setTimeout(() => {
-                setIframeState((state) => ({ ...state, working: false }));
-              }, 6000);
-            }}
-            onReady={() => {
-              clearTimeout(iframeCountdownRef.current);
-              setIframeState((state) => ({ ...state, working: true }));
-            }}
-            onTimeUpdate={(e) => {
-              setIframeState((state) => ({
-                ...state,
-                currentTime: e.currentTarget.currentTime,
-              }));
+              setIframeState((state) => ({ ...state, working: true, loaded: true }));
             }}
           />
         ) : vidUrls?.length > 0 ? (
