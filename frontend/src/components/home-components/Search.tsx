@@ -1,11 +1,7 @@
 "use client";
 
-import useSearch from "@/src/hooks/useSearch";
 import { useRouter } from "nextjs-toploader/app";
-import type { ChangeEvent } from "react";
-import { useState } from "react";
 import { FaSearch } from "react-icons/fa";
-import LoadRoller from "../reusable-components/LoadRoller";
 
 
 
