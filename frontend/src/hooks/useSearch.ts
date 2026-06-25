@@ -40,7 +40,7 @@ const useSearch = () => {
         dispatch(addInfo({ key: urlId, info: info }));
         router.push(`/download/${urlId}?id=${info.id}`);
 
-      } else router.push(`/search?query=${search}`);
+      } else router.push(`/search?query=${encodeURIComponent(search)}`);
     } catch (err) {
       logger.error("Error searching", err);
       toast.error("There was an error searching for video");

@@ -7,7 +7,6 @@ import logger from "@/src/utils/logger";
 import { UploadApiResponse } from "cloudinary";
 import ffmpeg from "fluent-ffmpeg";
 
-
 export const runtime = "nodejs";
 
 const resolvedFfmpegPath = resolveFfmpegBinaryPath();
@@ -21,7 +20,10 @@ export async function GET(request: Request) {
   const start = searchParams.get("start");
   const end = searchParams.get("end");
   const stream = searchParams.get("stream");
-  const filename = searchParams.get("filename");
+  const filename = searchParams.get("filename") ?? "";
+  const filenameCleaned = filename.trim()
+    ? filename
+    : "download" + (fileType === "audio" ? ".mp3" : ".mp4");
   const startTime = parseTimeParam(start);
   const endTime = parseTimeParam(end);
   const hasStart = startTime !== null;
@@ -40,7 +42,9 @@ export async function GET(request: Request) {
         "Content-Type": fileType === "audio" ? "audio/mp3" : "video/mp4",
         "Content-Length": res.headers.get("Content-Length") || "",
         ...(!stream?.trim()
-          ? { "Content-Disposition": `attachment;filename="${filename}"` }
+          ? {
+              "Content-Disposition": `attachment; filename="${filenameCleaned}"; filename*=UTF-8''${encodeURIComponent(filenameCleaned)}`,
+            }
           : {
               "Content-Range": res.headers.get("Content-Range") || "",
               "Accept-Ranges": res.headers.get("Accept-Ranges") || "",
@@ -67,7 +71,10 @@ export async function GET(request: Request) {
   const cloudinaryRes: UploadApiResponse = await new Promise(
     (resolve, reject) => {
       const stream = uploader.upload_stream(
-        { folder: "/vdl-tube", resource_type: fileType === "audio" ? "auto" : "video" },
+        {
+          folder: "/vdl-tube",
+          resource_type: fileType === "audio" ? "auto" : "video",
+        },
         (err, result) => {
           if (err) {
             logger.error("Cloudnary upload err", err);
@@ -87,7 +94,7 @@ export async function GET(request: Request) {
     headers: {
       "Content-Type": fileType === "audio" ? "audio/mp3" : "video/mp4",
       "Content-Length": res.headers.get("Content-Length"),
-      "Content-Disposition": `attachment;filename="${filename}"`,
+      "Content-Disposition": `attachment; filename="${filenameCleaned}"; filename*=UTF-8''${encodeURIComponent(filenameCleaned)}`,
     },
   });
 }

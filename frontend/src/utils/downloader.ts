@@ -27,9 +27,7 @@ export const downloadFile = async (
     title && quality
       ? `${title}-${quality}${type === "audio" ? "K" : "P"}.${ext}`
       : `${v4()}.${ext}`;
-  link.href = encodeURIComponent(
-    `/api/download?url=${data.downloadUrl}&type=${type}&filename=${downloadFilename.replaceAll("&", "_").replaceAll("/", "_")}&${hasStart ? `&start=${start}` : ""}${hasStart && hasEnd && Number(start) < Number(end) ? `&end=${end}` : ""}`,
-  );
+  link.href = `/api/download?url=${encodeURIComponent(data.downloadUrl)}&type=${type}&filename=${encodeURIComponent(downloadFilename)}${hasStart ? `&start=${start}` : ""}${hasStart && hasEnd && Number(start) < Number(end) ? `&end=${end}` : ""}`;
   link.download = downloadFilename;
   link.click();
   return { finished: true };
