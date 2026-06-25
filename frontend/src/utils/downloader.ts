@@ -23,7 +23,7 @@ export const downloadFile = async (
   const hasEnd = Number.isFinite(end);
   const link = document.createElement("a");
   const ext = type === "audio" ? "mp3" : "mp4";
-  link.href = `/api/download?url=${data.downloadUrl}${hasStart ? `&start=${start}&type=${type}` : ""}${hasStart && hasEnd && Number(start) < Number(end) ? `&end=${end}` : ""}`;
+  link.href = `/api/download?url=${data.downloadUrl}&type=${type}${hasStart ? `&start=${start}` : ""}${hasStart && hasEnd && Number(start) < Number(end) ? `&end=${end}` : ""}`;
   const downloadFilename =
     title && quality
       ? `${title}-${quality}${type === "audio" ? "K" : "P"}.${ext}`
