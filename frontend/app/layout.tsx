@@ -7,6 +7,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../src/assets/css-reusable/variables.css";
 import AppProviders from "./providers";
+import { Analytics } from "@vercel/analytics/next"
 
 export const viewport: Viewport = {
   themeColor: "#000000",
@@ -31,6 +32,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   return (
     <html lang="en">
       <body>
+        <Analytics />
         <TopLoader />
         <AppProviders>
           <AppHeader />
