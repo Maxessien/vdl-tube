@@ -4,7 +4,7 @@ import {
   resolveFfmpegBinaryPath,
 } from "@/src/utils/downloadApi";
 import logger from "@/src/utils/logger";
-import { UploadApiResponse } from "cloudinary";
+import { UploadApiResponse, UploadResponseCallback, UploadStream } from "cloudinary";
 import ffmpeg from "fluent-ffmpeg";
 
 export const runtime = "nodejs";
@@ -67,6 +67,9 @@ export async function GET(request: Request) {
     .outputOptions("-movflags frag_keyframe+empty_moov");
 
   if (hasEnd) command.duration(endTime - startTime);
+
+  uploader.upload("file")
+  let o: UploadStream
 
   const cloudinaryRes: UploadApiResponse = await new Promise(
     (resolve, reject) => {
