@@ -1,23 +1,12 @@
-from typing import TypedDict, Union
 from os import curdir
 from uuid import uuid4
-from yt_dlp.YoutubeDL import _Params
+# from yt_dlp.YoutubeDL import _Params
 from yt_dlp import YoutubeDL
 from pathlib import Path
+from util.types import QueueItem
 import subprocess
 
 FFMPEG_LOCATION = ""
-
-
-class QueueItem(TypedDict):
-    vid_id: str
-    status: str
-    url: str
-    progess: int
-    format: Union[str, int, None]
-    path: Union[str, None]
-    start: Union[int, None]
-    end: Union[int, None]
 
 
 class DownloadQueue:
@@ -100,7 +89,7 @@ class DownloadQueue:
 
         output_path = f"{curdir}/uploads/{str(uuid4())}.mp4"
 
-        opts: _Params = {
+        opts = {
             "format": itm["format"] if itm["format"] else "bv*+ba/b",
             "ffmpeg_location": FFMPEG_LOCATION,
             "no_warnings": True,

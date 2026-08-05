@@ -2,16 +2,19 @@ from flask_cors import CORS
 from flask import jsonify, Flask, request
 from os import environ
 from yt_dlp import YoutubeDL
-from yt_dlp.YoutubeDL import _Params
+
+# from yt_dlp.YoutubeDL import _Params
 from util.queue import download_manager
+from util.types import MediaFormatList
+from util.helper import filter_formats, process_formats
 
 
-app = Flask()
+app = Flask((__name__))
 
 CORS(app)
 
 
-@app.route("/task", ["POST"])
+@app.route("/task", methods=["POST"])
 def queue_vid():
     body = dict(request.get_json())
     (url, start, end, format, vid_id) = (
@@ -38,9 +41,11 @@ def queue_vid():
         }
     )
 
-    if not download_manager.is_processing: download_manager.process_queue()
+    if not download_manager.is_processing:
+        download_manager.process_queue()
 
     return jsonify({"data": "Queued"}), 202
+
 
 @app.route("/formats", methods=["GET"])
 def get_vid_formats():
@@ -51,13 +56,40 @@ def get_vid_formats():
         if not url:
             return jsonify({"data": "Url is missing"}), 400
 
-        opt: _Params = {"no_warnings": True, "retries": 5}
+        opt = {"no_warnings": True, "retries": 5}
 
         yt = YoutubeDL(opt)
-        return jsonify(yt.extract_info(url, False)["formats"]), 200
-    except:
+        formats: MediaFormatList = yt.extract_info(url, False)["formats"]
+
+        audio_formats = list(
+            filter(lambda format: filter_formats(format, "audio"), formats)
+        )
+        video_formats = list(
+            filter(lambda format: filter_formats(format, "video"), formats)
+        )
+
+        return (
+            jsonify(
+                {
+                    "audio_formats": list(
+                        map(lambda f: process_formats(f, "audio"), audio_formats)
+                    ),
+                    "video_formats": list(
+                        map(lambda f: process_formats(f, "video"), video_formats)
+                    ),
+                }
+            ),
+            200,
+        )
+    except Exception as err:
+        print(err)
         return jsonify({"data": "Server error"}), 500
 
 
-if app.name == "__main__":
-    app.run("0.0.0.0", environ.get("PORT"), True, len(environ.get("PORT")) > 0)
+if __name__ == "__main__":
+    app.run(
+        "0.0.0.0",
+        environ.get("PORT"),
+        True,
+        environ.get("PORT") and len(environ.get("PORT")) > 0,
+    )
