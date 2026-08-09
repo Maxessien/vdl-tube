@@ -55,7 +55,6 @@ def queue_vid():
     if not download_manager.is_processing:
         t = Thread(target=download_manager.process_queue)
         t.start()
-        t.run()
 
     return jsonify({"data": "Queued", "task_id": t_id}), 202
 
@@ -99,7 +98,7 @@ def get_status():
             {
                 "task_id": task["task_id"],
                 "status": task["status"],
-                "progess": task["progess"],
+                "progress": task["progress"],
             }
         ),
         200,
