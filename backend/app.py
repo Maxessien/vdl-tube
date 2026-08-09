@@ -1,5 +1,5 @@
 from flask_cors import CORS
-from flask import jsonify, Flask, request
+from flask import jsonify, Flask, request, send_file
 from os import environ
 from yt_dlp import YoutubeDL
 
@@ -7,6 +7,7 @@ from yt_dlp import YoutubeDL
 from util.queue import download_manager
 from util.types import MediaFormatList
 from util.helper import filter_formats, process_formats
+from uuid import uuid4
 
 
 app = Flask((__name__))
@@ -17,16 +18,21 @@ CORS(app)
 @app.route("/task", methods=["POST"])
 def queue_vid():
     body = dict(request.get_json())
-    (url, start, end, format, vid_id) = (
+    (url, start, end, format, vid_id, ext, title, type) = (
         body.get("url"),
         body.get("start"),
         body.get("end"),
         body.get("format_id"),
         body.get("vid_id"),
+        body.get("ext"),
+        body.get("title"),
+        body.get("type"),
     )
 
     if not url or not vid_id:
         return jsonify({"data": "Url or Video id is missing"}), 400
+
+    t_id = str(uuid4())
 
     download_manager.items.append(
         {
@@ -38,13 +44,51 @@ def queue_vid():
             "status": "processing",
             "url": url,
             "vid_id": vid_id,
+            "task_id": t_id,
+            "ext": ext,
+            "title": title,
+            "type": type,
         }
     )
 
     if not download_manager.is_processing:
         download_manager.process_queue()
 
-    return jsonify({"data": "Queued"}), 202
+    return jsonify({"data": "Queued", "task_id": t_id}), 202
+
+
+@app.route("/download/<id>", methods=["GET"])
+def download(id: str):
+    task = download_manager.find(id)
+
+    if not task:
+        return jsonify({"data": "Task not found"}), 404
+
+    if task["status"] != "finished":
+        return jsonify({"data": "Processing not finished or failed"})
+
+    return (
+        send_file(
+            task["path"], f"{task["type"]}/{task["ext"]}", True, f"{task["title"]}"
+        ),
+        200,
+    )
+
+
+@app.route("/status", methods=["GET"])
+def get_status():
+    params = request.args
+    task_id = params.get("task_id")
+
+    if not task_id:
+        return jsonify({"data": "Task ID is missing"}), 400
+
+    task = download_manager.find(task_id)
+
+    if not task:
+        return jsonify({"data": "Task not found"}), 404
+
+    return jsonify(task), 200
 
 
 @app.route("/formats", methods=["GET"])

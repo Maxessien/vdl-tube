@@ -1,8 +1,17 @@
 import axios from "axios";
 import { v4 } from "uuid";
 import { resolveDownloadUrl } from "./mate";
+import { ContentType } from "../types/matesTypes";
+import { Task } from "../types/ytdlpTypes";
 
-export const downloadFile = async (
+const linkDl = (url: string, filename) => {
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+};
+
+const downloadFile = async (
   vidKey: string,
   quality: number,
   titleSlug: string,
@@ -21,19 +30,79 @@ export const downloadFile = async (
   const { data } = downloadUrlRes;
   const hasStart = Number.isFinite(start);
   const hasEnd = Number.isFinite(end);
-  const link = document.createElement("a");
+
   const ext = type === "audio" ? "mp3" : "mp4";
   const downloadFilename =
     title && quality
       ? `${title}-${quality}${type === "audio" ? "K" : "P"}.${ext}`
       : `${v4()}.${ext}`;
-  link.href = `/api/download?url=${encodeURIComponent(data.downloadUrl)}&type=${type}&filename=${encodeURIComponent(downloadFilename)}${hasStart ? `&start=${start}` : ""}${hasStart && hasEnd && Number(start) < Number(end) ? `&end=${end}` : ""}`;
-  link.download = downloadFilename;
-  link.click();
+  const url = `/api/download?url=${encodeURIComponent(data.downloadUrl)}&type=${type}&filename=${encodeURIComponent(downloadFilename)}${hasStart ? `&start=${start}` : ""}${hasStart && hasEnd && Number(start) < Number(end) ? `&end=${end}` : ""}`;
+
+  linkDl(url, downloadFilename);
+
   return { finished: true };
 };
 
-export const getYouTubeID = (url: string): string | null => {
+const ytdlpDownload = async (
+  title: string,
+  formatId: string,
+  vidId: string,
+  url: string,
+  type: "audio" | "video" | "all",
+  ext: string,
+  quality: number | string,
+  setProg: (val: { isActive: boolean; prog: number }) => void,
+  start?: number,
+  end?: number,
+) => {
+  const { data } = await axios.post<{ data: string; task_id: string }>(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/task`,
+    {
+      format: formatId,
+      vid_id: vidId,
+      url,
+      end,
+      start,
+      ext,
+      title,
+      type,
+    },
+  );
+
+  let isFinished = false;
+
+  await new Promise((res, rej) => {
+    const intervalId = setInterval(async () => {
+      if (isFinished) {
+        res("Finished");
+        clearInterval(intervalId);
+        return;
+      }
+      try {
+        const { data: task } = await axios.get<Task>(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/status`,
+          { params: { task_id: data.task_id } },
+        );
+
+        setProg({ isActive: true, prog: task.progess });
+
+        if (task.status === "finished") isFinished = true;
+      } catch (err) {
+        rej(err);
+        clearInterval(intervalId);
+        return;
+      }
+    }, 2000);
+  });
+
+  const dlUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/download/${data.task_id}`;
+
+  linkDl(dlUrl, `${title}-${quality}${type === "audio" ? "K" : "P"}.${ext}`)
+  
+  return { finished: true };
+};
+
+const getYouTubeID = (url: string): string | null => {
   const regex =
     /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/;
   const match = url.match(regex);
@@ -45,7 +114,7 @@ export const getYouTubeID = (url: string): string | null => {
   return null;
 };
 
-export const timestampToSeconds = (timestamp: string): number => {
+const timestampToSeconds = (timestamp: string): number => {
   return timestamp
     .split(":")
     .reverse()
@@ -54,7 +123,7 @@ export const timestampToSeconds = (timestamp: string): number => {
     }, 0);
 };
 
-export const secondsToTimestamp = (
+const secondsToTimestamp = (
   seconds: number,
   omitHours: boolean = false,
 ): string => {
@@ -70,9 +139,9 @@ export const secondsToTimestamp = (
   return timeArr.map((part) => part.toString().padStart(2, "0")).join(":");
 };
 
-export const IFRAME_EMBED_URL = "https://invidious.tiekoetter.com/embed";
+const IFRAME_EMBED_URL = "https://invidious.tiekoetter.com/embed";
 
-export const checkIframeUrl = async (url: string) => {
+const checkIframeUrl = async (url: string) => {
   try {
     // A HEAD request is faster because it downloads headers, not the full page body
     const response = await axios.head(url, { timeout: 3000 });
@@ -88,14 +157,60 @@ export const checkIframeUrl = async (url: string) => {
   }
 };
 
-export const isYouTubePlaylist = (url: string): boolean => {
+const isYouTubePlaylist = (url: string): boolean => {
   const regex =
     /(?:https?:\/\/)?(?:www\.)?youtube\.com\/playlist\?list=([^&\s]+)/;
   return regex.test(url);
 };
 
-export const extractPlaylistId = (url: string): string | null => {
+const extractPlaylistId = (url: string): string | null => {
   const regex = /[?&]list=([^&\s]+)/;
   const match = url.match(regex);
   return match ? match[1] : null;
+};
+
+const formatFilesize = (size: number) => {
+  let sizes = ["MB", "GB", "TB", "PB"];
+  let converted = size / 1024;
+  let convIdx = 0;
+
+  while (converted > 1024 && convIdx < sizes.length) {
+    converted /= 1024;
+    convIdx++;
+  }
+
+  return `${converted} ${size[convIdx]}`;
+};
+
+const getVidUrl = async (
+  quality: string,
+  key: string,
+  titleSlug: string,
+  type: ContentType = "video",
+) => {
+  try {
+    const { data } = await resolveDownloadUrl(
+      key,
+      quality,
+      type,
+      null,
+      titleSlug,
+    );
+    if (!data) return null;
+    return `/api/download?url=${data?.downloadUrl}&stream=true`;
+  } catch (err) {
+    return null;
+  }
+};
+
+export {
+  checkIframeUrl,
+  downloadFile,
+  extractPlaylistId,
+  formatFilesize,
+  getVidUrl,
+  getYouTubeID,
+  secondsToTimestamp,
+  timestampToSeconds,
+  isYouTubePlaylist, ytdlpDownload, IFRAME_EMBED_URL
 };

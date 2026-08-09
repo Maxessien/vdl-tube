@@ -1,4 +1,4 @@
-from util.types import MediaFormat
+from util.types import MediaFormat, Ext, AudioCodec
 
 
 def filter_formats(f: MediaFormat, type: str):
@@ -15,7 +15,7 @@ def filter_formats(f: MediaFormat, type: str):
             f["video_ext"] != "none"
             and f["format_id"]
             and (f.get("filesize") or f.get("filesize_approx"))
-            and f.get("ext") != "mhtml"
+            and f.get("ext") != Ext.MHTML
             and f.get("resolution") != "audio only"
             and parse_resolution(f.get("resolution"))
             and not f.get("has_drm")
@@ -33,8 +33,10 @@ def process_formats(f: MediaFormat, type: str) -> MediaFormat:
         "url": f.get("url"),
     }
     if type == "video":
-        format["resolution"] = parse_resolution(f.get("resolution") or "")
-    if type == "audio": format["resolution"] = f.get("abr")
+        format["quality"] = parse_resolution(f.get("resolution") or "")
+    if type == "audio": format["quality"] = f.get("abr")
+    if not f.get("acodec") or f.get("acodec") == AudioCodec.NONE: format["format_id"] += "+ba"
+
     return format
 
 

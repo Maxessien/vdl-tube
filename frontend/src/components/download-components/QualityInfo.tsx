@@ -1,5 +1,9 @@
 import type { VideoInfo } from "@/src/types/matesTypes";
-import { downloadFile, getYouTubeID } from "@/src/utils/downloader";
+import {
+  downloadFile,
+  getYouTubeID,
+  ytdlpDownload,
+} from "@/src/utils/downloader";
 import logger from "@/src/utils/logger";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
@@ -9,17 +13,40 @@ import { FaArrowLeft, FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
 import Chapters from "./Chapters";
 import RangeDownload from "./RangeDownload";
+import { YtdlpFormatsRes } from "@/src/types/ytdlpTypes";
 
 interface QualityInfo {
   info: VideoInfo;
+  ytdlpFormats: YtdlpFormatsRes | null;
   quality: number;
   closeInfoFn: () => void;
-  formatType: "audio" | "video"
+  formatType: "audio" | "video";
 }
 
-const QualityInfo = ({ info, closeInfoFn, quality, formatType }: QualityInfo) => {
-  const { key, duration, title, titleSlug, url } = info;
-  const [downloading, setDownloading] = useState({ isActive: true, type: "" });
+const QualityInfo = ({
+  info,
+  closeInfoFn,
+  quality,
+  formatType,
+  ytdlpFormats,
+}: QualityInfo) => {
+  const { key, duration, title, titleSlug, url, id } = info;
+
+  const {
+    ext,
+    format_id,
+    url: ytUrl,
+  } = ytdlpFormats;
+
+  const [downloading, setDownloading] = useState<{
+    isActive: boolean;
+    type: string;
+    prog: number;
+    start: null | number;
+    end: number | null;
+    isProcessing: boolean
+  }>({ isActive: true, type: "", prog: 0, start: null, end: null, isProcessing: false });
+
   const { mutateAsync, isPending } = useMutation({
     mutationFn: ({
       start,
@@ -32,25 +59,50 @@ const QualityInfo = ({ info, closeInfoFn, quality, formatType }: QualityInfo) =>
       title: string;
       end?: number;
     }) => {
-      setDownloading({ isActive: true, type: type });
-      if (type === "range")
+      setDownloading({ isActive: true, type: type, prog: 0, end, start, isProcessing: false });
+
+      if (start || end)
         toast.warn("Range downloads takes more time to process video/audio");
+
       if (type.trim().startsWith("chapter"))
         toast.warn(
           "Chapter downloads takes more time to process and trim video/audio",
         );
-      return downloadFile(
-        key,
-        quality,
-        titleSlug,
-        title,
-        formatType,
-        start ?? undefined,
-        end ?? undefined,
-      );
+
+      if (ytdlpFormats) {
+        return ytdlpDownload(
+          title,
+          format_id,
+          id,
+          ytUrl,
+          formatType,
+          ext,
+          quality,
+          ({ isActive, prog }) =>
+            setDownloading((st) => ({ ...st, prog: prog, isProcessing: isActive })),
+          start,
+          end,
+        );
+      } else {
+        return downloadFile(
+          key,
+          quality,
+          titleSlug,
+          title,
+          formatType,
+          start ?? undefined,
+          end ?? undefined,
+        );
+      }
     },
-    onSuccess: () => toast.success((formatType === "audio" ? "Audio" : "Video") + " download started"),
-    onError: () => toast.error((formatType === "audio" ? "Audio" : "Video") + " download failed"),
+    onSuccess: () =>
+      toast.success(
+        (formatType === "audio" ? "Audio" : "Video") + " download started",
+      ),
+    onError: () =>
+      toast.error(
+        (formatType === "audio" ? "Audio" : "Video") + " download failed",
+      ),
     onSettled: () => setDownloading((state) => ({ ...state, isActive: false })),
   });
 
@@ -61,16 +113,20 @@ const QualityInfo = ({ info, closeInfoFn, quality, formatType }: QualityInfo) =>
 
   const getChapters = async () => {
     const vidId = info?.id ?? getYouTubeID(url);
-    const chapters = await axios.get<{title: string, start: number}[]>("/api/chapter", {params: {id: vidId}});
+    const chapters = await axios.get<{ title: string; start: number }[]>(
+      "/api/chapter",
+      { params: { id: vidId } },
+    );
     return chapters.data;
   };
 
   useEffect(() => {
+
     (async () => {
       setChaps((state) => ({ ...state, isLoading: true }));
       try {
         const chapters = await getChapters();
-        if (!chapters) throw new Error("No chapters for this video")
+        if (!chapters) throw new Error("No chapters for this video");
         setChaps({
           isLoading: false,
           data: chapters?.map(({ title, start }) => ({
@@ -80,13 +136,12 @@ const QualityInfo = ({ info, closeInfoFn, quality, formatType }: QualityInfo) =>
         });
       } catch (err) {
         logger.log("Chapter fetch error", err);
-        setChaps({isLoading: false, data: []})
+        setChaps({ isLoading: false, data: [] });
       }
     })();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
-  console.log(formatType)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>
@@ -106,23 +161,16 @@ const QualityInfo = ({ info, closeInfoFn, quality, formatType }: QualityInfo) =>
         >
           {downloading.isActive && downloading.type === "full" ? (
             <>
-              <span className="sr-only">Downloading full{" "}{(formatType === "audio" ? "Audio" : "Video")}</span>
+              <span className="sr-only">
+                Downloading {formatType === "audio" ? "Audio" : "Video"}
+              </span>
               <FaSpinner className="text-3xl animate-spin" />
             </>
           ) : (
-            "Download Full " + (formatType === "audio" ? "Audio" : "Video")
+            "Download " + (formatType === "audio" ? "Audio" : "Video")
           )}
         </button>
       </section>
-
-      <RangeDownload
-        isPending={isPending}
-        isActive={downloading.isActive && downloading.type === "range"}
-        duration={duration}
-        submitFn={(start, end) =>
-          mutateAsync({ type: "range", start, end, title })
-        }
-      />
 
       <Chapters
         isActive={(type) => downloading.isActive && downloading.type === type}

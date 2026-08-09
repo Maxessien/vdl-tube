@@ -12,6 +12,10 @@ class QueueItem(TypedDict):
     path: Union[str, None]
     start: Union[int, None]
     end: Union[int, None]
+    task_id: str
+    ext: Ext
+    title: str
+    type: str
 
 class AudioCodec(str, Enum):
     NONE = "none"
