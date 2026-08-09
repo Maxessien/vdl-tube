@@ -40,7 +40,7 @@ def queue_vid():
             "end": end,
             "format": format,
             "path": None,
-            "progess": 0,
+            "progress": 0,
             "start": start,
             "status": "processing",
             "url": url,
@@ -53,7 +53,7 @@ def queue_vid():
     )
 
     if not download_manager.is_processing:
-        t = Thread(target=download_manager.process_queue())
+        t = Thread(target=download_manager.process_queue)
         t.start()
         t.run()
 
