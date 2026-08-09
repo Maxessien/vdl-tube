@@ -8,7 +8,7 @@ from pathlib import Path
 from util.types import QueueItem
 import subprocess
 
-FFMPEG_LOCATION = ""
+FFMPEG_LOCATION = "C:/Users/Dell/Documents/projects/vdl-tube/frontend/node_modules/ffmpeg-static/ffmpeg.exe"
 
 
 class DownloadQueue:
@@ -83,6 +83,7 @@ class DownloadQueue:
 
     def __save_prog(self, itm: QueueItem, val: int):
         itm["progress"] = self.__calculate_progress(val)
+        if round(itm["progress"]) % 25: print(itm["progress"])
 
     def process_queue(self):
         if self.is_processing or len(self.items) == 0:
@@ -94,7 +95,10 @@ class DownloadQueue:
 
         filename = str(uuid4())
 
-        output_path = f"{curdir}/uploads/{filename}.{itm["ext"]}"
+        output_path = Path(curdir)
+        sub_path = Path(f"uploads/{filename}.{itm["ext"]}")
+
+        output_path = output_path.joinpath(sub_path)
 
         opts = {
             "format": itm["format"] if itm["format"] else "bv*+ba/b",
@@ -102,6 +106,7 @@ class DownloadQueue:
             "no_warnings": True,
             "outtmpl": f"{output_path}",
             "progress_hooks": [lambda val: self.__save_prog(itm, val)],
+            "merge_output_format": itm["ext"]
         }
 
         yt = YoutubeDL(opts)
