@@ -87,7 +87,7 @@ const QualityInfo = ({
           "Chapter downloads takes more time to process and trim video/audio",
         );
 
-      console.log(ytdlpFormats)
+      console.log(ytdlpFormats);
 
       if (ytdlpFormats) {
         return ytdlpDownload(
@@ -127,7 +127,7 @@ const QualityInfo = ({
       toast.error(
         (formatType === "audio" ? "Audio" : "Video") + " download failed",
       ),
-    onSettled: () => setDownloading((state) => ({ ...state, isActive: false })),
+    onSettled: () => setDownloading((state) => ({ ...state, isActive: false, isProcessing: false })),
   });
 
   const [enableTrim, setEnableTrim] = useState(false);
@@ -219,7 +219,10 @@ const QualityInfo = ({
                     const val = Number(e.target.value);
                     setRange((prev) => ({
                       ...prev,
-                      rangeStart: Math.min(val, (prev.rangeEnd ?? duration) - 1),
+                      rangeStart: Math.min(
+                        val,
+                        (prev.rangeEnd ?? duration) - 1,
+                      ),
                     }));
                   }}
                   disabled={isPending || downloading.isActive}
@@ -252,31 +255,39 @@ const QualityInfo = ({
           )}
         </div>
 
-        <button
-          onClick={() =>
-            mutateAsync({
-              type: "full",
-              title,
-              end: enableTrim ? (range.rangeEnd ?? undefined) : undefined,
-              start: enableTrim ? (range.rangeStart ?? undefined) : undefined,
-            })
-          }
-          disabled={
-            isPending || (downloading.isActive && downloading.type === "full")
-          }
-          className="flex disabled:opacity-75 py-3 px-4 w-full justify-center items-center text-xl text-(--text-primary) not-visited:rounded-full bg-(--main-primary) font-semibold transition-transform active:scale-[0.98]"
-        >
-          {downloading.isActive && downloading.type === "full" ? (
-            <>
-              <span className="sr-only">
-                Downloading {formatType === "audio" ? "Audio" : "Video"}
-              </span>
-              <FaSpinner className="text-3xl animate-spin" />
-            </>
-          ) : (
-            "Download " + (formatType === "audio" ? "Audio" : "Video")
+        <div className="relative rounded-full">
+          {downloading.isProcessing && (
+            <div
+              style={{ width: `${downloading.prog}%` }}
+              className="bg-(--main-primary-light) opacity-85 absolute top-0 left-0 h-full rounded-full"
+            ></div>
           )}
-        </button>
+          <button
+            onClick={() =>
+              mutateAsync({
+                type: "full",
+                title,
+                end: enableTrim ? (range.rangeEnd ?? undefined) : undefined,
+                start: enableTrim ? (range.rangeStart ?? undefined) : undefined,
+              })
+            }
+            disabled={
+              isPending || (downloading.isActive && downloading.type === "full")
+            }
+            className="flex disabled:opacity-75 py-3 px-4 w-full justify-center items-center text-xl text-(--text-primary) rounded-full bg-(--main-primary) font-semibold transition-transform active:scale-[0.98]"
+          >
+            {downloading.isActive && downloading.type === "full" ? (
+              <>
+                <span className="sr-only">
+                  Downloading {formatType === "audio" ? "Audio" : "Video"}
+                </span>
+                <FaSpinner className="text-3xl animate-spin" />
+              </>
+            ) : (
+              "Download " + (formatType === "audio" ? "Audio" : "Video")
+            )}
+          </button>
+        </div>
       </section>
 
       <Chapters
