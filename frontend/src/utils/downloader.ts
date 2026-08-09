@@ -186,7 +186,7 @@ const formatFilesize = (size?: number | null) => {
     unitIdx++;
   }
 
-  return `${converted.toFixed(2)} ${units[unitIdx]}`;
+  return `approx. ${converted.toFixed(2)} ${units[unitIdx]}`;
 };
 const getVidUrl = async (
   quality: string,

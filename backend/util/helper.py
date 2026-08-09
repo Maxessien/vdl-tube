@@ -35,7 +35,7 @@ def process_formats(f: MediaFormat, type: str) -> MediaFormat:
     if type == "video":
         format["quality"] = parse_resolution(f.get("resolution") or "")
         if not f.get("acodec") or f.get("acodec") == AudioCodec.NONE: format["format_id"] += "+ba"
-    if type == "audio": format["quality"] = f.get("abr")
+    if type == "audio": format["quality"] = round(f.get("abr"))
 
     return format
 
