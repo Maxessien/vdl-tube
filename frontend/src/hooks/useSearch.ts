@@ -38,7 +38,7 @@ const useSearch = () => {
         const info = await getVideoInfo(search);
         
         dispatch(addInfo({ key: urlId, info: info }));
-        router.push(`/download/${urlId}?id=${info.id}`);
+        router.push(`/download/${urlId}?id=${info.id}&vid_url=${info.url}`);
 
       } else router.push(`/search?query=${encodeURIComponent(search)}`);
     } catch (err) {
