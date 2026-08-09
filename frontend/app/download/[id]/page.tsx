@@ -26,15 +26,15 @@ const DownloadPage = async ({ params, searchParams }: DownloadPageProps) => {
 
   try {
     const { data } = await axios.get<{
-      audio: YtdlpFormatsRes[];
-      video: YtdlpFormatsRes[];
+      audio_formats: YtdlpFormatsRes[];
+      video_formats: YtdlpFormatsRes[];
     }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/formats`, {
       params: { url: spar.vid_url },
     });
     
     ytFormats = {
-      audio: data.audio.map((v) => ({ ...v, mapId: v4() })),
-      video: data.video.map((v) => ({ ...v, mapId: v4() })),
+      audio: data.audio_formats.map((v) => ({ ...v, mapId: v4() })),
+      video: data.video_formats.map((v) => ({ ...v, mapId: v4() })),
     };
   } catch (error) {
     console.log(`Error getting ytdlp formats`, error)

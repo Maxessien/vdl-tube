@@ -40,7 +40,7 @@ class DownloadQueue:
         ]
 
         if itm["end"]:
-            default_arg += ["-t", itm["end"]]
+            default_arg += ["-t", str(itm["end"])]
 
         default_arg += ["-c", "copy", new_path]
 
@@ -114,11 +114,12 @@ class DownloadQueue:
         yt.download([itm["url"]])
         itm["path"] = output_path
 
-        itm["status"] = "finished"
 
         self.__clip_vid(itm)
         self.__save_processed(itm)
 
+        itm["status"] = "finished"
+        
         if len(self.items) == 0:
             self.is_processing = False
             return

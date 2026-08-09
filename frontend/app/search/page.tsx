@@ -27,7 +27,7 @@ const SearchPage = async ({
     (p) => p.is(YTNodes.Playlist) || p.is(YTNodes.GridPlaylist),
   );
 
-  console.log(videos[0])
+  console.log(videos?.[0])
 
   // Serialize videos to plain objects for Client Component
   const serializedVideos: SerializedVideoResult[] = videos?.map((vids) => ({

@@ -30,12 +30,12 @@ const FormatsListCard = ({
 }) => {
   return (
     <li className="w-full flex justify-between items-center px-3 py-5 space-y-3 text-left rounded-md bg-(--main-secondary-light) shadow-md shadow-gray-700">
-      <div className="flex-1 space-y-1">
+      <div className="flex-1 space-y-3">
         <p className="text-xl text-(--text-primary) font-bold">
           Quality - {quality}
           {type === "audio" ? "K" : "P"}
         </p>
-        <p>{formatFilesize(fileSize)}</p>
+        <p className="text-sm md:text-base text-(--text-primary-light) leading-1 font-semibold">{formatFilesize(fileSize)}</p>
       </div>
       <button
         onClick={openInfo}
@@ -263,6 +263,28 @@ const VideoFormats = ({
           {info?.title}
         </h1>
 
+        {/* Server Selector Added Here */}
+        <div className="flex justify-center items-center mb-4 w-full">
+          <label htmlFor="server-selector" className="mr-3 text-(--text-primary) font-semibold">
+            Server:
+          </label>
+          <select
+            id="server-selector"
+            disabled={qualityInfo?.isOpen}
+            value={server.id}
+            onChange={(e) =>
+              setServer((prev) => ({
+                ...prev,
+                id: e.target.value as "server1" | "server2",
+              }))
+            }
+            className="bg-(--main-secondary-light) text-(--text-primary) border border-gray-600 rounded-md px-3 py-1.5 outline-none focus:border-(--main-primary) disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <option value="server1">Server 1</option>
+            {hasYtlp && <option value="server2">Server 2</option>}
+          </select>
+        </div>
+
         <div className="flex mb-3 w-full items-end">
           <button
             onClick={() => {
@@ -353,12 +375,16 @@ const VideoFormats = ({
               }
               quality={
                 formatView === "video"
-                  ? info.video_formats.find(
+                  ? !hasYtlp ? info.video_formats.find(
                       ({ quality }) => qualityInfo.mapId === quality,
-                    ).quality
-                  : info.audio_formats.find(
+                    )?.quality : (ytdlpFormats?.video?.find(
+                        ({ mapId }) => qualityInfo.mapId === mapId,
+                      )?.quality || 0)
+                  : !hasYtlp ? info.audio_formats.find(
                       ({ quality }) => qualityInfo.mapId === quality,
-                    ).quality
+                    )?.quality : (ytdlpFormats?.audio?.find(
+                        ({ mapId }) => qualityInfo.mapId === mapId,
+                      )?.quality || 0)
               }
               closeInfoFn={() =>
                 setQualityInfo((state) => ({ ...state, isOpen: false }))
