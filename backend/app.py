@@ -8,6 +8,7 @@ from util.queue import download_manager
 from util.types import MediaFormatList
 from util.helper import filter_formats, process_formats
 from uuid import uuid4
+from threading import Thread
 
 
 app = Flask((__name__))
@@ -22,7 +23,7 @@ def queue_vid():
         body.get("url"),
         body.get("start"),
         body.get("end"),
-        body.get("format_id"),
+        body.get("format"),
         body.get("vid_id"),
         body.get("ext"),
         body.get("title"),
@@ -52,7 +53,9 @@ def queue_vid():
     )
 
     if not download_manager.is_processing:
-        download_manager.process_queue()
+        t = Thread(target=download_manager.process_queue())
+        t.start()
+        t.run()
 
     return jsonify({"data": "Queued", "task_id": t_id}), 202
 
@@ -65,11 +68,14 @@ def download(id: str):
         return jsonify({"data": "Task not found"}), 404
 
     if task["status"] != "finished":
-        return jsonify({"data": "Processing not finished or failed"})
+        return jsonify({"data": "Processing not finished or failed"}), 409
+
+    if not task["path"]:
+        return jsonify({"data": "File is not available"}), 409
 
     return (
         send_file(
-            task["path"], f"{task["type"]}/{task["ext"]}", True, f"{task["title"]}"
+            task["path"], f"{task["type"]}/{task["ext"]}", True, f"{task["title"]}.{task["ext"]}"
         ),
         200,
     )
@@ -88,7 +94,16 @@ def get_status():
     if not task:
         return jsonify({"data": "Task not found"}), 404
 
-    return jsonify(task), 200
+    return (
+        jsonify(
+            {
+                "task_id": task["task_id"],
+                "status": task["status"],
+                "progess": task["progess"],
+            }
+        ),
+        200,
+    )
 
 
 @app.route("/formats", methods=["GET"])

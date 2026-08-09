@@ -12,7 +12,6 @@ import { useEffect, useState } from "react";
 import { FaArrowLeft, FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
 import Chapters from "./Chapters";
-import RangeDownload from "./RangeDownload";
 import { YtdlpFormatsRes } from "@/src/types/ytdlpTypes";
 
 interface QualityInfo {
@@ -32,12 +31,6 @@ const QualityInfo = ({
 }: QualityInfo) => {
   const { key, duration, title, titleSlug, url, id } = info;
 
-  const {
-    ext,
-    format_id,
-    url: ytUrl,
-  } = ytdlpFormats;
-
   const [downloading, setDownloading] = useState<{
     isActive: boolean;
     type: string;
@@ -45,7 +38,7 @@ const QualityInfo = ({
     start: null | number;
     end: number | null;
     isProcessing: boolean
-  }>({ isActive: true, type: "", prog: 0, start: null, end: null, isProcessing: false });
+  }>({ isActive: false, type: "", prog: 0, start: null, end: null, isProcessing: false });
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: ({
@@ -72,11 +65,11 @@ const QualityInfo = ({
       if (ytdlpFormats) {
         return ytdlpDownload(
           title,
-          format_id,
+          ytdlpFormats.format_id,
           id,
-          ytUrl,
+          url,
           formatType,
-          ext,
+          ytdlpFormats.ext,
           quality,
           ({ isActive, prog }) =>
             setDownloading((st) => ({ ...st, prog: prog, isProcessing: isActive })),

@@ -11,7 +11,7 @@ export interface Task {
   vid_id: string;
   status: string;
   url: string;
-  progess: number;
+  progress: number;
   format: string | number | null;
   path: string | null;
   start: number | null;

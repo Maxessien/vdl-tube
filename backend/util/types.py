@@ -3,20 +3,6 @@ from typing import TypedDict, Union, NotRequired
 from enum import Enum
 
 
-class QueueItem(TypedDict):
-    vid_id: str
-    status: str
-    url: str
-    progess: int
-    format: Union[str, int, None]
-    path: Union[str, None]
-    start: Union[int, None]
-    end: Union[int, None]
-    task_id: str
-    ext: Ext
-    title: str
-    type: str
-
 class AudioCodec(str, Enum):
     NONE = "none"
     MP4A_40_5 = "mp4a.40.5"
@@ -113,3 +99,18 @@ class MediaFormat(TypedDict):
 
 # Example usage for the root list:
 MediaFormatList = List[MediaFormat]
+
+
+class QueueItem(TypedDict):
+    vid_id: str
+    status: str
+    url: str
+    progress: int
+    format: Union[str, int, None]
+    path: Union[str, None]
+    start: Union[int, None]
+    end: Union[int, None]
+    task_id: str
+    ext: Ext
+    title: str
+    type: str

@@ -1,11 +1,8 @@
 "use client";
 
 import { RootState } from "@/src/store";
-import type {
-  AudioFormat,
-  ContentType,
-  VideoFormat,
-} from "@/src/types/matesTypes";
+import type { ContentType } from "@/src/types/matesTypes";
+import { YtdlpFormatsRes } from "@/src/types/ytdlpTypes";
 import {
   formatFilesize,
   getVidUrl,
@@ -19,7 +16,6 @@ import { useSelector } from "react-redux";
 import { v4 } from "uuid";
 import VideoPlayer from "../video-player/VideoPlayer";
 import QualityInfo from "./QualityInfo";
-import { YtdlpFormatsRes } from "@/src/types/ytdlpTypes";
 
 const FormatsListCard = ({
   quality,
@@ -73,14 +69,22 @@ const VideoFormats = ({
   const [vidUrls, setVidUrls] = useState<UrlInfo[]>([]);
   const info = infos?.[id];
 
-  const infoAudio = info.audio_formats.map((v) => ({
-    ...v,
-    mapId: v.quality.toString(),
-  }));
-  const infoVideo = info.video_formats.map((v) => ({
-    ...v,
-    mapId: v.quality.toString(),
-  }));
+  const infoAudio = useMemo(
+    () =>
+      (info?.audio_formats ?? []).map((v) => ({
+        ...v,
+        mapId: v.quality.toString(),
+      })),
+    [info],
+  );
+  const infoVideo = useMemo(
+    () =>
+      (info?.video_formats ?? []).map((v) => ({
+        ...v,
+        mapId: v.quality.toString(),
+      })),
+    [info],
+  );
 
   const [formatView, setFormatView] = useState<"audio" | "video">("video");
   const [iframeState, setIframeState] = useState({
@@ -143,7 +147,7 @@ const VideoFormats = ({
       if (iframeState.working) return;
       if (!info) return;
 
-      const formats = [...info.video_formats];
+      const formats = [...info?.video_formats];
       for (const format of formats?.reverse()) {
         if (!isMounted) break;
 
@@ -182,7 +186,7 @@ const VideoFormats = ({
     }
 
     return () => clearTimeout(iframeCountdownRef.current);
-  }, [info.id, setIframeState]);
+  }, [info?.id, setIframeState]);
 
   const availableServers = useMemo(
     () =>
@@ -196,13 +200,13 @@ const VideoFormats = ({
   );
 
   useEffect(() => {
-    
-    setServer((st) => ({
-      ...st,
-      vidFormats: availableServers[st.id].video,
-      audioFormats: availableServers[st.id].audio,
-    }));
-
+    setServer((st) => {
+      const next = availableServers[st.id];
+      if (st.vidFormats === next.video && st.audioFormats === next.audio) {
+        return st;
+      }
+      return { ...st, vidFormats: next.video, audioFormats: next.audio };
+    });
   }, [server.id, availableServers]);
 
   if (!info) return notFound();
@@ -283,7 +287,7 @@ const VideoFormats = ({
         {!qualityInfo?.isOpen && (
           <ul className="space-y-4">
             {formatView === "video" ? (
-              server?.vidFormats.length > 0 ? (
+              (server?.vidFormats?.length ?? 0) > 0 ? (
                 server?.vidFormats.map(
                   ({ filesize, mapId, quality }, index) => (
                     <FormatsListCard
@@ -305,7 +309,7 @@ const VideoFormats = ({
                   No Video format
                 </p>
               )
-            ) : server.audioFormats.length > 0 ? (
+            ) : (server?.audioFormats?.length ?? 0) > 0 ? (
               server.audioFormats.map(({ filesize, mapId, quality }, index) => (
                 <FormatsListCard
                   key={index}
@@ -339,12 +343,12 @@ const VideoFormats = ({
               ytdlpFormats={
                 hasYtlp
                   ? formatView === "video"
-                    ? ytdlpFormats.video.find(
+                    ? (ytdlpFormats?.video?.find(
                         ({ mapId }) => qualityInfo.mapId === mapId,
-                      )
-                    : ytdlpFormats.audio.find(
+                      ) ?? null)
+                    : (ytdlpFormats?.audio?.find(
                         ({ mapId }) => qualityInfo.mapId === mapId,
-                      )
+                      ) ?? null)
                   : null
               }
               quality={

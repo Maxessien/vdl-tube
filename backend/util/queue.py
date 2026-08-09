@@ -19,6 +19,7 @@ class DownloadQueue:
     def __init__(self, init_items: list = []):
         self.items = init_items
         self.is_processing = False
+        self.popped = []
 
     def __clip_vid(self, itm: QueueItem):
         if not itm["start"] and not itm["end"]:
@@ -81,7 +82,7 @@ class DownloadQueue:
         pass
 
     def __save_prog(self, itm: QueueItem, val: int):
-        itm["progess"] = self.__calculate_progress(val)
+        itm["progress"] = self.__calculate_progress(val)
 
     def process_queue(self):
         if self.is_processing or len(self.items) == 0:
@@ -119,12 +120,18 @@ class DownloadQueue:
         else:
             return self.process_queue()
 
-    def find(self, f_id: str, type: str = "popped", field: str = "task_id"):
-        for itm in self.items if type == "processing" else self.popped:
+    def find(self, f_id: str, type: str = "all", field: str = "task_id"):
+        if type == "processing":
+            source = self.items
+        elif type == "popped":
+            source = self.popped
+        else:
+            source = [*self.popped, *self.items]
+
+        for itm in source:
             if itm.get(field) and f_id == itm.get(field):
                 return itm
 
         return None
-
 
 download_manager = DownloadQueue()

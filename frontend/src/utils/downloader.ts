@@ -1,10 +1,10 @@
 import axios from "axios";
 import { v4 } from "uuid";
-import { resolveDownloadUrl } from "./mate";
 import { ContentType } from "../types/matesTypes";
 import { Task } from "../types/ytdlpTypes";
+import { resolveDownloadUrl } from "./mate";
 
-const linkDl = (url: string, filename) => {
+const linkDl = (url: string, filename: string) => {
   const link = document.createElement("a");
   link.href = url;
   link.download = filename;
@@ -69,32 +69,37 @@ const ytdlpDownload = async (
     },
   );
 
-  let isFinished = false;
+  const MAX_ATTEMPTS = 450; // 15 minutes at 2s intervals
 
-  await new Promise((res, rej) => {
-    const intervalId = setInterval(async () => {
-      if (isFinished) {
-        res("Finished");
-        clearInterval(intervalId);
+  await new Promise<void>((res, rej) => {
+    let attempts = 0;
+
+    const poll = async () => {
+      if (attempts++ >= MAX_ATTEMPTS) {
+        rej(new Error("Download timed out"));
         return;
       }
+
       try {
         const { data: task } = await axios.get<Task>(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/status`,
           { params: { task_id: data.task_id } },
         );
 
-        setProg({ isActive: true, prog: task.progess });
+        setProg({ isActive: true, prog: task.progress });
 
-        if (task.status === "finished") isFinished = true;
+        if (task.status === "finished") return res();
+        if (task.status === "failed") return rej(new Error("Download failed"));
+
+        setTimeout(poll, 2000);
       } catch (err) {
         rej(err);
-        clearInterval(intervalId);
-        return;
       }
-    }, 2000);
-  });
+    };
 
+    setTimeout(poll, 2000);
+  });
+  
   const dlUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/download/${data.task_id}`;
 
   linkDl(dlUrl, `${title}-${quality}${type === "audio" ? "K" : "P"}.${ext}`)
@@ -169,19 +174,20 @@ const extractPlaylistId = (url: string): string | null => {
   return match ? match[1] : null;
 };
 
-const formatFilesize = (size: number) => {
-  let sizes = ["MB", "GB", "TB", "PB"];
-  let converted = size / 1024;
-  let convIdx = 0;
+const formatFilesize = (size?: number | null) => {
+  if (!Number.isFinite(size) || (size as number) <= 0) return "Unknown size";
 
-  while (converted > 1024 && convIdx < sizes.length) {
+  const units = ["B", "KB", "MB", "GB", "TB", "PB"];
+  let converted = size as number;
+  let unitIdx = 0;
+
+  while (converted >= 1024 && unitIdx < units.length - 1) {
     converted /= 1024;
-    convIdx++;
+    unitIdx++;
   }
 
-  return `${converted} ${size[convIdx]}`;
+  return `${converted.toFixed(2)} ${units[unitIdx]}`;
 };
-
 const getVidUrl = async (
   quality: string,
   key: string,
@@ -197,7 +203,7 @@ const getVidUrl = async (
       titleSlug,
     );
     if (!data) return null;
-    return `/api/download?url=${data?.downloadUrl}&stream=true`;
+    return `/api/download?url=${encodeURIComponent(data.downloadUrl)}&stream=true`;
   } catch (err) {
     return null;
   }
@@ -209,8 +215,7 @@ export {
   extractPlaylistId,
   formatFilesize,
   getVidUrl,
-  getYouTubeID,
-  secondsToTimestamp,
-  timestampToSeconds,
-  isYouTubePlaylist, ytdlpDownload, IFRAME_EMBED_URL
+  getYouTubeID, IFRAME_EMBED_URL, isYouTubePlaylist, secondsToTimestamp,
+  timestampToSeconds, ytdlpDownload
 };
+
