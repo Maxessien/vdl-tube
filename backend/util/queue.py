@@ -8,8 +8,13 @@ from pathlib import Path
 from util.types import QueueItem
 import subprocess
 
-FFMPEG_LOCATION = "C:/Users/Dell/Documents/projects/vdl-tube/frontend/node_modules/ffmpeg-static/ffmpeg.exe"
+LOCAL_FFMPEG = "C:/Users/Dell/Documents/projects/vdl-tube/frontend/node_modules/ffmpeg-static/ffmpeg.exe"
 
+if os.path.exists(LOCAL_FFMPEG):
+    FFMPEG_LOCATION = LOCAL_FFMPEG
+else:
+    # shutil.which searches the system environment PATH (works perfectly on Hugging Face Linux)
+    FFMPEG_LOCATION = shutil.which("ffmpeg") or "ffmpeg"
 
 class DownloadQueue:
     is_processing: bool
