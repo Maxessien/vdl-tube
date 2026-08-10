@@ -74,7 +74,7 @@ def download(id: str):
 
     return (
         send_file(
-            task["path"], f"{task["type"]}/{task["ext"]}", True, f"{task["title"]}.{task["ext"]}"
+            task["path"], f"{task['type']}/{task['ext']}", True, f"{task['title']}.{task['ext']}"
         ),
         200,
     )
