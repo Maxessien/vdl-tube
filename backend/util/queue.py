@@ -31,7 +31,7 @@ class DownloadQueue:
             return
 
         path = Path(itm["path"])
-        new_path = f"{str(path).replace(path.suffix, f"_trimmed{path.suffix}")}"
+        new_path = f"{str(path).replace(path.suffix, '_trimmed' + path.suffix)}"
 
         if not path.exists() or not path.is_file():
             return
