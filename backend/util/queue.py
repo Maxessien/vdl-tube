@@ -101,7 +101,7 @@ class DownloadQueue:
         filename = str(uuid4())
 
         output_path = Path(curdir)
-        sub_path = Path(f"uploads/{filename}.{itm["ext"]}")
+        sub_path = Path(f"uploads/{filename}.{itm['ext']}")
 
         output_path = output_path.joinpath(sub_path)
 
