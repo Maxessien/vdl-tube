@@ -7,6 +7,8 @@ from yt_dlp import YoutubeDL
 from pathlib import Path
 from util.types import QueueItem
 import subprocess
+import os
+import shutil
 
 LOCAL_FFMPEG = "C:/Users/Dell/Documents/projects/vdl-tube/frontend/node_modules/ffmpeg-static/ffmpeg.exe"
 
