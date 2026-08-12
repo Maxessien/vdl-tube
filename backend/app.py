@@ -134,12 +134,7 @@ def get_vid_formats():
                 "youtube": {
                     "player_client": ["ios", "android"],
                 }
-            },
-            "http_headers": {
-                "User-Agent": "com.google.ios.youtube/19.29.1 (iPhone16,2; U; CPU iPhone OS 17_5_1 like Mac OS X; en_US)",
-                "Accept": "*/*",
-                "Accept-Language": "en-US,en;q=0.9",
-            },
+            }
         }
 
         yt = YoutubeDL(opt)
