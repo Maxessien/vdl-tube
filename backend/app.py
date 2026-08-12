@@ -3,10 +3,10 @@ from flask import jsonify, Flask, request, send_file
 from os import environ
 from yt_dlp import YoutubeDL
 
-# from yt_dlp.YoutubeDL import _Params
+from yt_dlp.YoutubeDL import _Params
 from util.queue import download_manager
 from util.types import MediaFormatList
-from util.helper import filter_formats, process_formats
+from util.helper import filter_formats, process_formats, build_cookie_file
 from uuid import uuid4
 from threading import Thread
 
@@ -114,17 +114,10 @@ def get_vid_formats():
         if not url:
             return jsonify({"data": "Url is missing"}), 400
 
-        opt = {
+        opt: _Params = {
             "no_warnings": True, 
             "retries": 5,
-            'nocheckcertificate': True,         # Forces bypass of SSL verification errors
-            'prefer_insecure': True,            # Prevents strict data center TLS handshakes
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5',
-                'Cookie': environ.get("COOKIES") or None
-            }
+            "cookiefile": build_cookie_file()
         }
 
         yt = YoutubeDL(opt)

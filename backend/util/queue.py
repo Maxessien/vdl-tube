@@ -6,6 +6,7 @@ from pathlib import Path
 from yt_dlp import YoutubeDL
 from pathlib import Path
 from util.types import QueueItem
+from util.helper import build_cookie_file
 import subprocess
 import os
 import shutil
@@ -17,6 +18,7 @@ if os.path.exists(LOCAL_FFMPEG):
 else:
     # shutil.which searches the system environment PATH (works perfectly on Hugging Face Linux)
     FFMPEG_LOCATION = shutil.which("ffmpeg") or "ffmpeg"
+
 
 class DownloadQueue:
     is_processing: bool
@@ -90,7 +92,8 @@ class DownloadQueue:
 
     def __save_prog(self, itm: QueueItem, val: int):
         itm["progress"] = self.__calculate_progress(val)
-        if round(itm["progress"]) % 25: print(itm["progress"])
+        if round(itm["progress"]) % 25:
+            print(itm["progress"])
 
     def process_queue(self):
         if self.is_processing or len(self.items) == 0:
@@ -114,14 +117,14 @@ class DownloadQueue:
             "outtmpl": f"{output_path}",
             "progress_hooks": [lambda val: self.__save_prog(itm, val)],
             "merge_output_format": itm["ext"],
-            'nocheckcertificate': True,         # Forces bypass of SSL verification errors
-            'prefer_insecure': True,            # Prevents strict data center TLS handshakes
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5',
-                'Cookie': os.environ.get("COOKIES") or None
-            }
+            "cookiefile": build_cookie_file(),
+            "nocheckcertificate": True,  # Forces bypass of SSL verification errors
+            "prefer_insecure": True,  # Prevents strict data center TLS handshakes
+            "http_headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.5",
+            },
         }
 
         yt = YoutubeDL(opts)
@@ -129,12 +132,11 @@ class DownloadQueue:
         yt.download([itm["url"]])
         itm["path"] = output_path
 
-
         self.__clip_vid(itm)
         self.__save_processed(itm)
 
         itm["status"] = "finished"
-        
+
         if len(self.items) == 0:
             self.is_processing = False
             return
@@ -154,5 +156,6 @@ class DownloadQueue:
                 return itm
 
         return None
+
 
 download_manager = DownloadQueue()
