@@ -130,26 +130,36 @@ def get_vid_formats():
             "format": "all",
             "nocheckcertificate": True,  # Forces bypass of SSL verification errors
             "prefer_insecure": True,  # Prevents strict data center TLS handshakes
+            "extractor_args": {
+                "youtube": {
+                    "player_client": ["ios", "android"],
+                }
+            },
             "http_headers": {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-                "Accept-Language": "en-US,en;q=0.5",
+                "User-Agent": "com.google.ios.youtube/19.29.1 (iPhone16,2; U; CPU iPhone OS 17_5_1 like Mac OS X; en_US)",
+                "Accept": "*/*",
+                "Accept-Language": "en-US,en;q=0.9",
             },
         }
 
         yt = YoutubeDL(opt)
         max_attempts = 3
-        
+
         for attempt in range(max_attempts):
             try:
                 # Attempt to extract information cleanly
                 video_info = yt.extract_info(url, download=False)
                 formats: MediaFormatList = video_info["formats"]
-                break # Exit the loop if extraction succeeds completely
+                break  # Exit the loop if extraction succeeds completely
             except Exception as e:
                 # If YouTube asks for a page reload, loop back and try again cleanly
-                if "The page needs to be reloaded" in str(e) and attempt < max_attempts - 1:
-                    print(f"[yt-dlp] Caught reload request. Retrying extraction loop ({attempt + 1}/{max_attempts})...")
+                if (
+                    "The page needs to be reloaded" in str(e)
+                    and attempt < max_attempts - 1
+                ):
+                    print(
+                        f"[yt-dlp] Caught reload request. Retrying extraction loop ({attempt + 1}/{max_attempts})..."
+                    )
                     continue
                 raise e
 
