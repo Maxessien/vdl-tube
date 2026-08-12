@@ -1,3 +1,7 @@
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from flask_cors import CORS
 from flask import jsonify, Flask, request, send_file
 from os import environ
@@ -14,6 +18,8 @@ from threading import Thread
 app = Flask((__name__))
 
 CORS(app)
+
+print(build_cookie_file())
 
 
 @app.route("/task", methods=["POST"])

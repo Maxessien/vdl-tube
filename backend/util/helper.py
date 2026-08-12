@@ -1,5 +1,6 @@
 from util.types import MediaFormat, Ext, AudioCodec
-from os import path, environ
+from os import path, environ, curdir
+from pathlib import Path
 
 
 def filter_formats(f: MediaFormat, type: str):
@@ -47,7 +48,9 @@ def parse_resolution(r: str):
 
 def build_cookie_file():
     secret_cookie_content = environ.get("COOKIES")
-    secure_cookie_path = "/tmp/secure_cookies.txt"
+
+    base = Path(curdir)
+    secure_cookie_path = base.joinpath("/tmp/secure_cookies.txt")
 
     if path.exists(secure_cookie_path): return secure_cookie_path
         
