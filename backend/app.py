@@ -130,11 +130,6 @@ def get_vid_formats():
             "format": "all",
             "nocheckcertificate": True,  # Forces bypass of SSL verification errors
             "prefer_insecure": True,  # Prevents strict data center TLS handshakes
-            "extractor_args": {
-                "youtube": {
-                    "player_client": ["ios", "android"],
-                }
-            }
         }
 
         yt = YoutubeDL(opt)
