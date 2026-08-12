@@ -80,7 +80,10 @@ def download(id: str):
 
     return (
         send_file(
-            task["path"], f"{task['type']}/{task['ext']}", True, f"{task['title']}.{task['ext']}"
+            task["path"],
+            f"{task['type']}/{task['ext']}",
+            True,
+            f"{task['title']}.{task['ext']}",
         ),
         200,
     )
@@ -121,9 +124,14 @@ def get_vid_formats():
             return jsonify({"data": "Url is missing"}), 400
 
         opt = {
-            "no_warnings": True, 
+            "no_warnings": True,
             "retries": 5,
-            "cookiefile": build_cookie_file()
+            "cookiefile": build_cookie_file(),
+            "http_headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.5",
+            },
         }
 
         yt = YoutubeDL(opt)
