@@ -3,7 +3,7 @@ from flask import jsonify, Flask, request, send_file
 from os import environ
 from yt_dlp import YoutubeDL
 
-from yt_dlp.YoutubeDL import _Params
+# from yt_dlp.YoutubeDL import _Params
 from util.queue import download_manager
 from util.types import MediaFormatList
 from util.helper import filter_formats, process_formats, build_cookie_file
@@ -114,7 +114,7 @@ def get_vid_formats():
         if not url:
             return jsonify({"data": "Url is missing"}), 400
 
-        opt: _Params = {
+        opt = {
             "no_warnings": True, 
             "retries": 5,
             "cookiefile": build_cookie_file()
