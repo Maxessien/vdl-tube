@@ -133,25 +133,9 @@ def get_vid_formats():
         }
 
         yt = YoutubeDL(opt)
-        max_attempts = 3
 
-        for attempt in range(max_attempts):
-            try:
-                # Attempt to extract information cleanly
-                video_info = yt.extract_info(url, download=False)
-                formats: MediaFormatList = video_info["formats"]
-                break  # Exit the loop if extraction succeeds completely
-            except Exception as e:
-                # If YouTube asks for a page reload, loop back and try again cleanly
-                if (
-                    "The page needs to be reloaded" in str(e)
-                    and attempt < max_attempts - 1
-                ):
-                    print(
-                        f"[yt-dlp] Caught reload request. Retrying extraction loop ({attempt + 1}/{max_attempts})..."
-                    )
-                    continue
-                raise e
+        video_info = yt.extract_info(url, download=False)
+        formats: MediaFormatList = video_info["formats"]
 
         audio_formats = list(
             filter(lambda format: filter_formats(format, "audio"), formats)
@@ -169,6 +153,7 @@ def get_vid_formats():
                     "video_formats": list(
                         map(lambda f: process_formats(f, "video"), video_formats)
                     ),
+                    "raw": formats
                 }
             ),
             200,
