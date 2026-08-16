@@ -126,7 +126,7 @@ def get_vid_formats():
         opt = {
             "no_warnings": True,
             "retries": 5,
-            #"cookiefile": build_cookie_file(),
+            "cookiefile": build_cookie_file(),
             "skip_download": True,
         }
 
