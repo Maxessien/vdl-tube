@@ -63,7 +63,7 @@ def queue_vid():
     download_manager.items.append(itm)
 
     if not download_manager.is_processing:
-        t = Thread(target= lambda _: process_q(itm))
+        t = Thread(target= lambda m: process_q(itm))
         t.start()
 
     return jsonify({"data": "Queued", "task_id": t_id}), 202
