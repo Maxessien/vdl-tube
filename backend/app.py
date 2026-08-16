@@ -29,44 +29,48 @@ def process_q(itm: QueueItem):
 
 @app.route("/task", methods=["POST"])
 def queue_vid():
-    body = dict(request.get_json())
-    (url, start, end, format, vid_id, ext, title, type) = (
-        body.get("url"),
-        body.get("start"),
-        body.get("end"),
-        body.get("format"),
-        body.get("vid_id"),
-        body.get("ext"),
-        body.get("title"),
-        body.get("type"),
-    )
+    try:
+        body = dict(request.get_json())
+        (url, start, end, format, vid_id, ext, title, type) = (
+            body.get("url"),
+            body.get("start"),
+            body.get("end"),
+            body.get("format"),
+            body.get("vid_id"),
+            body.get("ext"),
+            body.get("title"),
+            body.get("type"),
+        )
 
-    if not url or not vid_id:
-        return jsonify({"data": "Url or Video id is missing"}), 400
+        if not url or not vid_id:
+            return jsonify({"data": "Url or Video id is missing"}), 400
 
-    t_id = str(uuid4())
-    itm: QueueItem = {
-            "end": end,
-            "format": format,
-            "path": None,
-            "progress": 0,
-            "start": start,
-            "status": "processing",
-            "url": url,
-            "vid_id": vid_id,
-            "task_id": t_id,
-            "ext": ext,
-            "title": title,
-            "type": type,
-        }
+        t_id = str(uuid4())
+        itm: QueueItem = {
+                "end": end,
+                "format": format,
+                "path": None,
+                "progress": 0,
+                "start": start,
+                "status": "processing",
+                "url": url,
+                "vid_id": vid_id,
+                "task_id": t_id,
+                "ext": ext,
+                "title": title,
+                "type": type,
+            }
 
-    download_manager.items.append(itm)
+        download_manager.items.append(itm)
 
-    if not download_manager.is_processing:
-        t = Thread(target= lambda m: process_q(itm))
-        t.start()
+        if not download_manager.is_processing:
+            t = Thread(target= lambda m: process_q(itm))
+            t.start()
 
-    return jsonify({"data": "Queued", "task_id": t_id}), 202
+        return jsonify({"data": "Queued", "task_id": t_id}), 202
+    except Exception as err:
+        print(err)
+        return jsonify({"data": "Server error"}), 500
 
 
 @app.route("/download/<id>", methods=["GET"])
