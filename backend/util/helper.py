@@ -1,5 +1,5 @@
 from util.types import MediaFormat, Ext, AudioCodec
-from os import path, environ, curdir
+from os import path, environ, curdir, mkdir
 from pathlib import Path
 
 
@@ -49,14 +49,15 @@ def parse_resolution(r: str):
 def build_cookie_file():
     secret_cookie_content = environ.get("COOKIES")
 
-    base = Path(curdir)
-    secure_cookie_path = base.joinpath("/tmp/secure_cookies.txt")
+    base = Path(curdir).joinpath("assets")
+
+    if not base.exists(): mkdir(base)
+
+    secure_cookie_path = base.joinpath("secure_cookies.txt")
 
     if path.exists(secure_cookie_path): return secure_cookie_path
-        
+            
     if secret_cookie_content:
-        
-        # Write the Netscape cookie content to a secure internal folder
         with open(secure_cookie_path, "w", encoding="utf-8") as f:
             f.write(secret_cookie_content.strip())
     else: return None

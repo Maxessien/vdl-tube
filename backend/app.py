@@ -124,12 +124,11 @@ def get_vid_formats():
             return jsonify({"data": "Url is missing"}), 400
 
         opt = {
-            "no_warnings": True,
             "retries": 5,
             "cookiefile": build_cookie_file(),
             "format": "all",
-            "nocheckcertificate": True,  # Forces bypass of SSL verification errors
-            "prefer_insecure": True,  # Prevents strict data center TLS handshakes
+            "js_runtimes": {"node": {}},
+            "verbose": True
         }
 
         yt = YoutubeDL(opt)
