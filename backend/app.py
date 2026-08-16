@@ -128,7 +128,7 @@ def get_vid_formats():
             "retries": 5,
             "cookiefile": build_cookie_file(),
             "skip_download": True,
-            "force_ipv4": True,
+            "format": "all",
         }
 
         yt = YoutubeDL(opt)
