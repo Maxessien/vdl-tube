@@ -22,6 +22,23 @@ else:
 print(FFMPEG_LOCATION)
 
 
+class YtdlpCallbackLogger:
+    itm: QueueItem
+
+    def __init__(self, itm: QueueItem):
+        self.itm = itm
+
+    def debug(self, msg):
+        print(msg)
+
+    def warning(self, msg):
+        print(msg)
+
+    def error(self, msg):
+        self.itm["status"] = "failed"
+        print(f"yt-dlp Error Callback Intercepted: {msg}")
+
+
 class DownloadQueue:
     is_processing: bool
     items: list[QueueItem]
@@ -119,6 +136,7 @@ class DownloadQueue:
             "progress_hooks": [lambda val: self.__save_prog(itm, val)],
             "merge_output_format": itm["ext"],
             "cookiefile": build_cookie_file(),
+            "logger": YtdlpCallbackLogger(itm),
             # "http_headers": {
             #     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             #     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",

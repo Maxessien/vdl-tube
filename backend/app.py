@@ -9,10 +9,10 @@ from yt_dlp import YoutubeDL
 
 # from yt_dlp.YoutubeDL import _Params
 from util.queue import download_manager
-from util.types import MediaFormatList
+from util.types import MediaFormatList, QueueItem
 from util.helper import filter_formats, process_formats, build_cookie_file
 from uuid import uuid4
-from threading import Thread
+from threading import Thread, excepthook
 
 
 app = Flask((__name__))
@@ -21,6 +21,11 @@ CORS(app)
 
 print(build_cookie_file())
 
+def process_q(itm: QueueItem):
+    try:
+        download_manager.process_queue()
+    except:
+        itm["status"] = "failed"
 
 @app.route("/task", methods=["POST"])
 def queue_vid():
@@ -40,9 +45,7 @@ def queue_vid():
         return jsonify({"data": "Url or Video id is missing"}), 400
 
     t_id = str(uuid4())
-
-    download_manager.items.append(
-        {
+    itm: QueueItem = {
             "end": end,
             "format": format,
             "path": None,
@@ -56,10 +59,11 @@ def queue_vid():
             "title": title,
             "type": type,
         }
-    )
+
+    download_manager.items.append(itm)
 
     if not download_manager.is_processing:
-        t = Thread(target=download_manager.process_queue)
+        t = Thread(target= lambda _: process_q(itm))
         t.start()
 
     return jsonify({"data": "Queued", "task_id": t_id}), 202
