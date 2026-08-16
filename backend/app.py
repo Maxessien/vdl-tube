@@ -137,7 +137,8 @@ def get_vid_formats():
             "skip_download": True,
             "format": "all",
             "js_runtimes": {"node": {}},
-            "verbose": True
+            "verbose": True, 
+            "proxy": "http://wuawxipp:8jawgn3mw4k8@31.59.20.176:6754",
         }
 
         yt = YoutubeDL(opt)
