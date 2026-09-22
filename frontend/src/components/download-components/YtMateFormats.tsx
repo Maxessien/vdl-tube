@@ -1,13 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import FormatsHeaders from "./FormatsHeaders";
+import FormatsHeaders, { FormatLoading, ServerLoadingError } from "./FormatsHeaders";
 import { FormatsList } from "./FormatList";
 import { motion } from "framer-motion";
 import QualityInfo from "./QualityInfo";
-import { AudioFormat, VideoFormat, VideoInfo } from "@/src/types/matesTypes";
+import { AudioFormat, VideoFormat } from "@/src/types/matesTypes";
 import { getVideoInfo } from "@/src/utils/mate";
-import { notFound } from "next/navigation";
-import { FaSpinner } from "react-icons/fa";
 
 export const YtMateFormats = ({
   infoIsOpened,
@@ -47,6 +45,7 @@ export const YtMateFormats = ({
         },
       };
     },
+    staleTime: Infinity
   });
 
   function formatSelection(val: VideoFormat | AudioFormat) {
@@ -54,13 +53,8 @@ export const YtMateFormats = ({
     setIsOpened(true);
   }
 
-  if (!data && !isFetching) return notFound();
-  if (isFetching)
-    return (
-      <div className="w-full flex justify-center">
-        <FaSpinner className="animate-spin text-(--text-primary)" size={50} />
-      </div>
-    );
+  if (!data && !isFetching) return <ServerLoadingError />;
+  if (isFetching) return <FormatLoading />
 
   return (
     <>

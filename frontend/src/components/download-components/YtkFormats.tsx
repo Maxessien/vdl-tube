@@ -1,12 +1,10 @@
-import { DownloadOption, getVideoInfo, YtkVideoInfo } from "@/app/actions";
+import { DownloadOption, getVideoInfo } from "@/app/actions";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import FormatsHeaders from "./FormatsHeaders";
+import FormatsHeaders, { FormatLoading, ServerLoadingError } from "./FormatsHeaders";
 import { FormatsList } from "./FormatList";
 import { motion } from "framer-motion";
 import QualityInfo from "./QualityInfo";
-import { notFound } from "next/navigation";
-import { FaSpinner } from "react-icons/fa";
 
 export const YtkFormats = ({
   infoIsOpened,
@@ -44,15 +42,11 @@ export const YtkFormats = ({
         },
       };
     },
+    staleTime: Infinity
   });
 
-  if (!data && !isFetching) return notFound();
-  if (isFetching)
-    return (
-      <div className="w-full flex justify-center">
-        <FaSpinner className="animate-spin text-(--text-primary)" size={50} />
-      </div>
-    );
+  if (!data && !isFetching) return <ServerLoadingError />;
+  if (isFetching) return <FormatLoading />
 
   function formatSelection(val: DownloadOption) {
     setQualityInfo((st) => ({ ...st, selected: val }));
@@ -64,7 +58,10 @@ export const YtkFormats = ({
       <FormatsHeaders
         vidTitle={data.info.title}
         format={qualityInfo.formats}
-        setFormat={(f) => setQualityInfo((st) => ({ ...st, formats: f }))}
+        setFormat={(f) => {
+          setIsOpened(false)
+          setQualityInfo((st) => ({ ...st, formats: f }))
+        }}
       />
 
       {!infoIsOpened && (
