@@ -3,6 +3,7 @@ import { v4 } from "uuid";
 import { ContentType } from "../types/matesTypes";
 import { Task } from "../types/ytdlpTypes";
 import { resolveDownloadUrl } from "./mate";
+import { DownloadOption, getDownloadUrl, YtkVideoInfo } from "@/app/actions";
 
 const linkDl = (url: string, filename: string) => {
   const link = document.createElement("a");
@@ -43,6 +44,32 @@ const downloadFile = async (
 
   return { finished: true };
 };
+
+const ytkDownload = async (info: YtkVideoInfo, downloadOpt: DownloadOption,
+  type: ContentType,
+  start?: number,
+  end?: number,) => {
+  const res = await getDownloadUrl(info, downloadOpt, { maxAttempts: 50 })
+  let url: string | undefined
+
+  const ext = type === "audio" ? "mp3" : "mp4";
+  const dlName = `${info.title} - ${downloadOpt.quality}.${ext}`
+
+  if ((start && Number.isFinite(start)) || (end && Number.isFinite(start))) {
+
+    const nextApi = new URL("/api/download")
+    nextApi.searchParams.append("url", res.downloadUrl)
+    nextApi.searchParams.append("type", type)
+    nextApi.searchParams.append("filename", dlName)
+    if (start && Number.isFinite(start)) nextApi.searchParams.append("start", start.toString())
+    if (end && Number.isFinite(end) && (!start || end > start)) nextApi.searchParams.append("end", end.toString())
+
+  }else {url = res.downloadUrl}
+
+  linkDl(url, dlName)
+
+  return {finished: true}
+}
 
 const ytdlpDownload = async (
   title: string,
@@ -100,11 +127,11 @@ const ytdlpDownload = async (
 
     setTimeout(poll, 2000);
   });
-  
+
   const dlUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/download/${data.task_id}`;
 
   linkDl(dlUrl, `${title}-${quality}${type === "audio" ? "K" : "P"}.${ext}`)
-  
+
   return { finished: true };
 };
 
@@ -217,6 +244,5 @@ export {
   formatFilesize,
   getVidUrl,
   getYouTubeID, IFRAME_EMBED_URL, isYouTubePlaylist, secondsToTimestamp,
-  timestampToSeconds, ytdlpDownload
+  timestampToSeconds, ytdlpDownload, ytkDownload
 };
-

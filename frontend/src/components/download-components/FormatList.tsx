@@ -1,12 +1,7 @@
-import { DownloadOption, getVideoInfo, YtkVideoInfo } from "@/app/actions";
-import { AudioFormat, ContentType, VideoFormat } from "@/src/types/matesTypes";
+import { DownloadOption } from "@/app/actions";
+import { AudioFormat, VideoFormat } from "@/src/types/matesTypes";
 import { formatFilesize } from "@/src/utils/downloader";
-import { useState } from "react";
 import { FaArrowRight } from "react-icons/fa";
-import { motion } from "framer-motion";
-import QualityInfo from "./QualityInfo";
-import { useQuery } from "@tanstack/react-query";
-import FormatsHeaders from "./FormatsHeaders";
 
 const FormatsListCard = ({
   quality,

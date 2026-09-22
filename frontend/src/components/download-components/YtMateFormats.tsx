@@ -58,7 +58,7 @@ export const YtMateFormats = ({
   if (isFetching)
     return (
       <div className="w-full flex justify-center">
-        <FaSpinner className="animate-spin" size={30} />
+        <FaSpinner className="animate-spin text-(--text-primary)" size={50} />
       </div>
     );
 

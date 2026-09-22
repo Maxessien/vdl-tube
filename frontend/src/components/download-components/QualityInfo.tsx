@@ -1,9 +1,8 @@
 import type { VideoInfo } from "@/src/types/matesTypes";
-import { YtdlpFormatsRes } from "@/src/types/ytdlpTypes";
 import {
   downloadFile,
   getYouTubeID,
-  ytdlpDownload,
+  ytkDownload,
 } from "@/src/utils/downloader";
 import logger from "@/src/utils/logger";
 import { useMutation } from "@tanstack/react-query";
@@ -13,12 +12,12 @@ import { useEffect, useState } from "react";
 import { FaArrowLeft, FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
 import Chapters from "./Chapters";
-import { DownloadOption } from "@/app/actions";
+import { DownloadOption, getDownloadUrl, YtkVideoInfo } from "@/app/actions";
 
 interface QualityInfo {
   info: (VideoInfo & { quality: number }) | null;
   ytkInfo:
-    | (DownloadOption & { title: string; id: string; duration: number })
+    | (DownloadOption & {info: YtkVideoInfo})
     | null;
   closeInfoFn: () => void;
   formatType: "audio" | "video";
@@ -86,7 +85,8 @@ const QualityInfo = ({
           "Chapter downloads takes more time to process and trim video/audio",
         );
 
-      if (false) {
+      if (ytkInfo) {
+        return ytkDownload(ytkInfo.info, ytkInfo, formatType, start ?? undefined, end ?? undefined)
       } else {
         return downloadFile(
           info?.key,
@@ -136,7 +136,7 @@ const QualityInfo = ({
   });
 
   const getChapters = async () => {
-    const vidId = info?.id ?? ytkInfo?.id ?? getYouTubeID(info?.url);
+    const vidId = info?.id ?? ytkInfo?.info.videoId ?? getYouTubeID(info?.url);
     const chapters = await axios.get<{ title: string; start: number }[]>(
       "/api/chapter",
       { params: { id: vidId } },
@@ -198,7 +198,7 @@ const QualityInfo = ({
                 <input
                   type="range"
                   min={0}
-                  max={info?.duration ?? ytkInfo.duration ?? 100}
+                  max={info?.duration ?? ytkInfo?.info.durationSeconds ?? 100}
                   value={range.rangeStart ?? 0}
                   onChange={(e) => {
                     const val = Number(e.target.value);
@@ -208,7 +208,7 @@ const QualityInfo = ({
                         val,
                         (prev.rangeEnd ??
                           info?.duration ??
-                          ytkInfo.duration ??
+                          ytkInfo?.info.durationSeconds ??
                           100) - 1,
                       ),
                     }));
@@ -225,7 +225,7 @@ const QualityInfo = ({
                     {formatTime(
                       range.rangeEnd ??
                         info?.duration ??
-                        ytkInfo.duration ??
+                        ytkInfo?.info.durationSeconds ??
                         100,
                     )}
                   </span>
@@ -233,9 +233,9 @@ const QualityInfo = ({
                 <input
                   type="range"
                   min={0}
-                  max={info?.duration ?? ytkInfo.duration ?? 100}
+                  max={info?.duration ?? ytkInfo?.info.durationSeconds ?? 100}
                   value={
-                    range.rangeEnd ?? info?.duration ?? ytkInfo.duration ?? 100
+                    range.rangeEnd ?? info?.duration ?? ytkInfo?.info.durationSeconds ?? 100
                   }
                   onChange={(e) => {
                     const val = Number(e.target.value);
@@ -263,7 +263,7 @@ const QualityInfo = ({
             onClick={() =>
               mutateAsync({
                 type: "full",
-                title: info?.title || ytkInfo?.title || "",
+                title: info?.title || ytkInfo?.info.title || "",
                 end: enableTrim ? (range.rangeEnd ?? undefined) : undefined,
                 start: enableTrim ? (range.rangeStart ?? undefined) : undefined,
               })
