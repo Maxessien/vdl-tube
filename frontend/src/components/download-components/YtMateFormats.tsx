@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import QualityInfo from "./QualityInfo";
 import { AudioFormat, VideoFormat } from "@/src/types/matesTypes";
 import { getVideoInfo } from "@/src/utils/mate";
+import { notFound } from "next/navigation";
 
 export const YtMateFormats = ({
   infoIsOpened,
@@ -24,7 +25,7 @@ export const YtMateFormats = ({
     formats: "video",
   });
 
-  const { data, isFetching } = useQuery({
+  const { data, isFetching, isError, refetch } = useQuery({
     queryKey: [url, "ytmate-video-info"],
     queryFn: async () => {
       const res = await getVideoInfo(url);
@@ -48,6 +49,14 @@ export const YtMateFormats = ({
     staleTime: Infinity
   });
 
+  if (isFetching) return <FormatLoading />;
+  
+  if (isError) {
+    return <ServerLoadingError onRetry={() => refetch()} />;
+  }
+  
+  if (!data) return notFound();
+  
   function formatSelection(val: VideoFormat | AudioFormat) {
     setQualityInfo((st) => ({ ...st, selected: val }));
     setIsOpened(true);

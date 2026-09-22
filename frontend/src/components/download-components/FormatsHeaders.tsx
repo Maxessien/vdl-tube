@@ -53,7 +53,7 @@ export const FormatLoading = () => {
   );
 };
 
-export const ServerLoadingError = () => {
+export const ServerLoadingError = ({ onRetry }: { onRetry?: () => void }) => {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
@@ -72,6 +72,15 @@ export const ServerLoadingError = () => {
           Couldn't load the server. Please check your connection or switch servers.
         </p>
       </div>
+
+      {onRetry && (
+        <button
+          onClick={onRetry}
+          className="mt-2 px-4 py-2 text-xs font-semibold rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition-colors cursor-pointer"
+        >
+          Try Another Server
+        </button>
+      )}
     </motion.div>
   );
 };

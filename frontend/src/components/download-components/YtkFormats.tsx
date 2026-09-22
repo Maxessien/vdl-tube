@@ -5,6 +5,7 @@ import FormatsHeaders, { FormatLoading, ServerLoadingError } from "./FormatsHead
 import { FormatsList } from "./FormatList";
 import { motion } from "framer-motion";
 import QualityInfo from "./QualityInfo";
+import { notFound } from "next/navigation";
 
 export const YtkFormats = ({
   infoIsOpened,
@@ -23,7 +24,7 @@ export const YtkFormats = ({
     formats: "video",
   });
 
-  const { data, isFetching } = useQuery({
+  const { data, isFetching, isError, refetch } = useQuery({
     queryKey: [url, "ytk-video-info"],
     queryFn: async () => {
       const res = await getVideoInfo(url);
@@ -44,9 +45,14 @@ export const YtkFormats = ({
     },
     staleTime: Infinity
   });
-
-  if (!data && !isFetching) return <ServerLoadingError />;
-  if (isFetching) return <FormatLoading />
+  
+  if (isFetching) return <FormatLoading />;
+  
+  if (isError) {
+    return <ServerLoadingError onRetry={() => refetch()} />;
+  }
+  
+  if (!data) return notFound();
 
   function formatSelection(val: DownloadOption) {
     setQualityInfo((st) => ({ ...st, selected: val }));
