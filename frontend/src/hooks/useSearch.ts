@@ -24,22 +24,17 @@ const useSearch = () => {
         return;
       }
 
-      const isPlaylist = isYouTubePlaylist(search)
+      const isPlaylist = isYouTubePlaylist(search);
 
       if (isPlaylist) {
-        router.push(`/playlist/${extractPlaylistId(search)}`)
-        return
+        router.push(`/playlist/${extractPlaylistId(search)}`);
+        return;
       }
 
       const isUrl = youtubeUrlRegex.test(search);
 
       if (isUrl) {
-        const urlId = v4();
-        const info = await getVideoInfo(search);
-        
-        dispatch(addInfo({ key: urlId, info: info }));
-        router.push(`/download/${urlId}?id=${info.id}&vid_url=${info.url}`);
-
+        router.push(`/download?vid_url=${encodeURIComponent(search.trim())}`);
       } else router.push(`/search?query=${encodeURIComponent(search)}`);
     } catch (err) {
       logger.error("Error searching", err);
