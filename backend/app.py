@@ -7,12 +7,13 @@ from flask import jsonify, Flask, request, send_file
 from os import environ
 from yt_dlp import YoutubeDL
 
-# from yt_dlp.YoutubeDL import _Params
+from yt_dlp.YoutubeDL import _Params
 from util.queue import download_manager
-from util.types import MediaFormatList, QueueItem
+from util.types import MediaFormatList, QueueItem, Ext
 from util.helper import filter_formats, process_formats, build_cookie_file
 from uuid import uuid4
 from threading import Thread, excepthook
+from typing import Union
 
 
 app = Flask((__name__))
@@ -35,15 +36,17 @@ def queue_vid():
             body.get("url"),
             body.get("start"),
             body.get("end"),
-            body.get("format"),
+            str(body.get("format") or "ba+bv"),
             body.get("vid_id"),
-            body.get("ext"),
-            body.get("title"),
-            body.get("type"),
+            str(body.get("ext")) or Ext.MP4,
+            str(body.get("title") or ""),
+            str(body.get("type") or ""),
         )
 
         if not url or not vid_id:
             return jsonify({"data": "Url or Video id is missing"}), 400
+
+        cleanedExt = dict({"m4a": Ext.M4A, "webm": Ext.WEBM, "mhtml": Ext.MHTML, "mp4": Ext.MP4})
 
         t_id = str(uuid4())
         itm: QueueItem = {
@@ -56,7 +59,7 @@ def queue_vid():
                 "url": url,
                 "vid_id": vid_id,
                 "task_id": t_id,
-                "ext": ext,
+                "ext": cleanedExt[ext] if ext and cleanedExt.get(ext) else cleanedExt["mp4"],
                 "title": title,
                 "type": type,
             }
@@ -131,10 +134,10 @@ def get_vid_formats():
         if not url:
             return jsonify({"data": "Url is missing"}), 400
 
-        opt = {
+        opt: _Params = {
             "retries": 5,
-            "cookiefile": build_cookie_file(),
-            "skip_download": True,
+            "cookiefile": str(build_cookie_file()),
+            "skip_download": "True",
             "format": "all",
             "js_runtimes": {"node": {}},
             "verbose": True
@@ -143,7 +146,9 @@ def get_vid_formats():
         yt = YoutubeDL(opt)
 
         video_info = yt.extract_info(url, download=False)
-        formats: MediaFormatList = video_info["formats"]
+        formats: Union[MediaFormatList, None] = video_info.get("formats")
+
+        if not formats:  return jsonify("Formats not found"), 404
 
         audio_formats = list(
             filter(lambda format: filter_formats(format, "audio"), formats)
@@ -170,11 +175,12 @@ def get_vid_formats():
         print(err)
         return jsonify({"data": "Server error"}), 500
 
+port = environ.get("PORT")
 
 if __name__ == "__main__":
     app.run(
         "0.0.0.0",
-        environ.get("PORT"),
+        int(port) if port else None,
         True,
-        environ.get("PORT") and len(environ.get("PORT")) > 0,
+        True if port and len(port) > 0 else False,
     )
