@@ -4,7 +4,7 @@ import {
   resolveFfmpegBinaryPath,
 } from "@/src/utils/downloadApi";
 import logger from "@/src/utils/logger";
-import { UploadApiResponse, UploadResponseCallback, UploadStream } from "cloudinary";
+import { UploadApiResponse, UploadStream } from "cloudinary";
 import ffmpeg from "fluent-ffmpeg";
 
 export const runtime = "nodejs";

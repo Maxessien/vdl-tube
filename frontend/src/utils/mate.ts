@@ -191,6 +191,7 @@ export async function resolveDownloadUrl(
     }),
   });
 
+  
   if (!response) {
     return {
       status: false,
@@ -199,8 +200,10 @@ export async function resolveDownloadUrl(
       data: null,
     };
   }
+  
+  const json = await response.json()
 
-  return response.json() as Promise<DownloadUrlResult>;
+  return json as Promise<DownloadUrlResult>;
 }
 
 /**

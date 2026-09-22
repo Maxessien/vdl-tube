@@ -32,6 +32,7 @@ const downloadFile = async (
   const hasEnd = Number.isFinite(end);
 
   const ext = type === "audio" ? "mp3" : "mp4";
+
   const downloadFilename =
     title && quality
       ? `${title}-${quality}${type === "audio" ? "K" : "P"}.${ext}`

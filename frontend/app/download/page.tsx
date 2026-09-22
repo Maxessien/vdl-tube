@@ -9,12 +9,10 @@ export const metadata: Metadata = {
 };
 
 interface DownloadPageProps {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ id: string; vid_url: string }>;
+  searchParams: Promise<{ vid_url: string }>;
 }
 
-const DownloadPage = async ({ params, searchParams }: DownloadPageProps) => {
-  const par = await params;
+const DownloadPage = async ({ searchParams }: DownloadPageProps) => {
   const spar = await searchParams;
 
   let ytFormats:
@@ -24,27 +22,27 @@ const DownloadPage = async ({ params, searchParams }: DownloadPageProps) => {
       }
     | undefined;
 
-  try {
-    const { data } = await axios.get<{
-      audio_formats: YtdlpFormatsRes[];
-      video_formats: YtdlpFormatsRes[];
-    }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/formats`, {
-      params: { url: spar.vid_url },
-    });
+  // try {
+  //   const { data } = await axios.get<{
+  //     audio_formats: YtdlpFormatsRes[];
+  //     video_formats: YtdlpFormatsRes[];
+  //   }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/formats`, {
+  //     params: { url: spar.vid_url },
+  //   });
     
-    ytFormats = {
-      audio: data.audio_formats.map((v) => ({ ...v, mapId: v4() })),
-      video: data.video_formats.map((v) => ({ ...v, mapId: v4() })),
-    };
-  } catch (error) {
-    console.log(`Error getting ytdlp formats`, error)
-  }
+  //   ytFormats = {
+  //     audio: data.audio_formats.map((v) => ({ ...v, mapId: v4() })),
+  //     video: data.video_formats.map((v) => ({ ...v, mapId: v4() })),
+  //   };
+  // } catch (error) {
+  //   console.log(`Error getting ytdlp formats`, error)
+  // }
 
   return (
     <VideoFormats
       hasYtlp={(ytFormats?.video?.[0]?.format_id?.length ?? 0) > 0}
       ytdlpFormats={ytFormats}
-      id={par.id}
+      url={spar.vid_url}
     />
   );
 };

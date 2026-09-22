@@ -13,11 +13,13 @@ import { useEffect, useState } from "react";
 import { FaArrowLeft, FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
 import Chapters from "./Chapters";
+import { DownloadOption } from "@/app/actions";
 
 interface QualityInfo {
-  info: VideoInfo;
-  ytdlpFormats: YtdlpFormatsRes | null;
-  quality: number;
+  info: (VideoInfo & { quality: number }) | null;
+  ytkInfo:
+    | (DownloadOption & { title: string; id: string; duration: number })
+    | null;
   closeInfoFn: () => void;
   formatType: "audio" | "video";
 }
@@ -36,12 +38,9 @@ const formatTime = (totalSeconds: number | null) => {
 const QualityInfo = ({
   info,
   closeInfoFn,
-  quality,
   formatType,
-  ytdlpFormats,
+  ytkInfo,
 }: QualityInfo) => {
-  const { key, duration, title, titleSlug, url, id } = info;
-
   const [downloading, setDownloading] = useState<{
     isActive: boolean;
     type: string;
@@ -87,31 +86,12 @@ const QualityInfo = ({
           "Chapter downloads takes more time to process and trim video/audio",
         );
 
-      console.log(ytdlpFormats);
-
-      if (ytdlpFormats) {
-        return ytdlpDownload(
-          title,
-          ytdlpFormats.format_id,
-          id,
-          url,
-          formatType,
-          ytdlpFormats.ext,
-          quality,
-          ({ isActive, prog }) =>
-            setDownloading((st) => ({
-              ...st,
-              prog: prog,
-              isProcessing: isActive,
-            })),
-          start,
-          end,
-        );
+      if (false) {
       } else {
         return downloadFile(
-          key,
-          quality,
-          titleSlug,
+          info?.key,
+          info?.quality,
+          info?.titleSlug,
           title,
           formatType,
           start ?? undefined,
@@ -127,7 +107,12 @@ const QualityInfo = ({
       toast.error(
         (formatType === "audio" ? "Audio" : "Video") + " download failed",
       ),
-    onSettled: () => setDownloading((state) => ({ ...state, isActive: false, isProcessing: false })),
+    onSettled: () =>
+      setDownloading((state) => ({
+        ...state,
+        isActive: false,
+        isProcessing: false,
+      })),
   });
 
   const [enableTrim, setEnableTrim] = useState(false);
@@ -139,7 +124,7 @@ const QualityInfo = ({
   const handleToggleTrim = (checked: boolean) => {
     setEnableTrim(checked);
     if (checked) {
-      setRange({ rangeStart: 0, rangeEnd: duration });
+      setRange({ rangeStart: 0, rangeEnd: info?.duration || 100 });
     } else {
       setRange({ rangeStart: null, rangeEnd: null });
     }
@@ -151,7 +136,7 @@ const QualityInfo = ({
   });
 
   const getChapters = async () => {
-    const vidId = info?.id ?? getYouTubeID(url);
+    const vidId = info?.id ?? ytkInfo?.id ?? getYouTubeID(info?.url);
     const chapters = await axios.get<{ title: string; start: number }[]>(
       "/api/chapter",
       { params: { id: vidId } },
@@ -213,7 +198,7 @@ const QualityInfo = ({
                 <input
                   type="range"
                   min={0}
-                  max={duration}
+                  max={info?.duration ?? ytkInfo.duration ?? 100}
                   value={range.rangeStart ?? 0}
                   onChange={(e) => {
                     const val = Number(e.target.value);
@@ -221,7 +206,10 @@ const QualityInfo = ({
                       ...prev,
                       rangeStart: Math.min(
                         val,
-                        (prev.rangeEnd ?? duration) - 1,
+                        (prev.rangeEnd ??
+                          info?.duration ??
+                          ytkInfo.duration ??
+                          100) - 1,
                       ),
                     }));
                   }}
@@ -233,13 +221,22 @@ const QualityInfo = ({
               <div className="flex flex-col gap-2">
                 <label className="text-sm text-(--text-primary) flex justify-between font-semibold">
                   <span>End Time</span>
-                  <span>{formatTime(range.rangeEnd ?? duration)}</span>
+                  <span>
+                    {formatTime(
+                      range.rangeEnd ??
+                        info?.duration ??
+                        ytkInfo.duration ??
+                        100,
+                    )}
+                  </span>
                 </label>
                 <input
                   type="range"
                   min={0}
-                  max={duration}
-                  value={range.rangeEnd ?? duration}
+                  max={info?.duration ?? ytkInfo.duration ?? 100}
+                  value={
+                    range.rangeEnd ?? info?.duration ?? ytkInfo.duration ?? 100
+                  }
                   onChange={(e) => {
                     const val = Number(e.target.value);
                     setRange((prev) => ({
@@ -266,7 +263,7 @@ const QualityInfo = ({
             onClick={() =>
               mutateAsync({
                 type: "full",
-                title,
+                title: info?.title || ytkInfo?.title || "",
                 end: enableTrim ? (range.rangeEnd ?? undefined) : undefined,
                 start: enableTrim ? (range.rangeStart ?? undefined) : undefined,
               })
