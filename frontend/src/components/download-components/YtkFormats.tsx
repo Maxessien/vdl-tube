@@ -88,7 +88,7 @@ export const YtkFormats = ({
               setQualityInfo((state) => ({ ...state, selected: null }));
               setIsOpened(false);
             }}
-            ytkInfo={{ ...qualityInfo.selected, title: data.info.title, id: data.info.videoId, duration: data.info.durationSeconds }}
+            ytkInfo={{ ...qualityInfo.selected, info: data.info }}
             formatType={qualityInfo.formats}
           />
         </motion.div>
