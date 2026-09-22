@@ -1,6 +1,6 @@
 "use server";
 
-import { YouTubeToolkitError } from "@/src/utils/ytk";
+import { extractVideoId, YouTubeToolkitError } from "@/src/utils/ytk";
 
 /**
  * youtubetoolkit.com downloader client.
@@ -83,7 +83,7 @@ interface Session {
 
 let cachedSession: Session | null = null;
 
-function parseCookies(response: Response, previous: string): string {
+async function parseCookies(response: Response, previous: string): Promise<string> {
   const jar = new Map<string, string>();
   for (const part of previous.split("; ").filter(Boolean)) {
     const eq = part.indexOf("=");
@@ -117,7 +117,7 @@ async function createSession(signal?: AbortSignal): Promise<Session> {
       `Could not load the downloader page (${response.status}).`,
     );
   }
-  const cookie = parseCookies(response, "");
+  const cookie = await await parseCookies(response, "");
   const html = await response.text();
 
   const match = html.match(
@@ -201,7 +201,7 @@ async function postJson<T>(
     );
   }
 
-  session.cookie = parseCookies(response, session.cookie);
+  session.cookie = await parseCookies(response, session.cookie);
   return (await response.json()) as T;
 }
 
@@ -247,22 +247,6 @@ function mapOption(raw: RawOption, kind: "video" | "audio"): DownloadOption {
     ...(raw.status_url ? { statusUrl: raw.status_url } : {}),
     kind,
   };
-}
-
-/** Extract the 11-character video id from any common YouTube URL form. */
-export function extractVideoId(input: string): string | null {
-  const value = input.trim();
-  if (/^[a-zA-Z0-9_-]{11}$/.test(value)) return value;
-  const patterns = [
-    /[?&]v=([a-zA-Z0-9_-]{11})/,
-    /youtu\.be\/([a-zA-Z0-9_-]{11})/,
-    /\/(?:shorts|embed|live|v)\/([a-zA-Z0-9_-]{11})/,
-  ];
-  for (const pattern of patterns) {
-    const match = value.match(pattern);
-    if (match?.[1]) return match[1];
-  }
-  return null;
 }
 
 /**
